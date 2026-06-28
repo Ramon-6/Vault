@@ -1,0 +1,319 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#08090C;
+  --surface:#0F1117;
+  --border:#1C1F2B;
+  --border-hi:#2A2F40;
+  --text:#E8EAF0;
+  --muted:#6B7090;
+  --hint:#373B52;
+  --lime:#B8F241;
+  --lime-dim:rgba(184,242,65,0.1);
+  --lime-dim2:rgba(184,242,65,0.06);
+  --red:#FF4757;
+  --red-dim:rgba(255,71,87,0.1);
+  --amber:#FFAA33;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Inter',sans-serif;
+}
+
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased}
+
+.page{max-width:900px;margin:0 auto;padding:0 24px}
+
+nav{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;max-width:900px;margin:0 auto}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-mark{width:28px;height:28px;background:var(--lime);border-radius:6px;display:flex;align-items:center;justify-content:center}
+.logo-mark svg{width:16px;height:16px}
+.logo-name{font-size:16px;font-weight:700;color:var(--text);letter-spacing:-0.5px}
+.nav-links{display:flex;align-items:center;gap:8px}
+.nav-link{font-size:13px;color:var(--muted);text-decoration:none;padding:6px 12px;border-radius:6px;transition:color 0.15s}
+.nav-link:hover{color:var(--text)}
+.btn-nav{font-size:13px;font-weight:500;background:var(--lime);color:#0A0E00;padding:7px 16px;border-radius:7px;text-decoration:none;transition:opacity 0.15s}
+.btn-nav:hover{opacity:0.88}
+
+.hero{padding:72px 24px 60px;max-width:900px;margin:0 auto}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:var(--lime-dim2);border:1px solid rgba(184,242,65,0.15);color:var(--lime);font-size:12px;font-weight:500;padding:5px 12px;border-radius:99px;margin-bottom:28px;font-family:var(--mono)}
+.hero-badge span{width:6px;height:6px;background:var(--lime);border-radius:50%;display:inline-block;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+h1{font-size:52px;font-weight:800;line-height:1.08;letter-spacing:-2px;color:var(--text);max-width:700px;margin-bottom:20px}
+h1 em{font-style:normal;color:var(--lime)}
+.hero-sub{font-size:17px;color:var(--muted);max-width:480px;line-height:1.6;margin-bottom:36px}
+.hero-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.btn-primary{font-size:14px;font-weight:600;background:var(--lime);color:#0A0E00;padding:11px 24px;border-radius:8px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:opacity 0.15s}
+.btn-primary:hover{opacity:0.88}
+.btn-ghost{font-size:14px;color:var(--muted);text-decoration:none;padding:11px 16px;display:inline-flex;align-items:center;gap:6px;transition:color 0.15s}
+.btn-ghost:hover{color:var(--text)}
+.hero-note{font-size:12px;color:var(--hint);margin-top:14px;font-family:var(--mono)}
+
+.stats-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-radius:12px;overflow:hidden;margin:0 24px;max-width:900px;margin:0 auto 64px}
+.stat{background:var(--surface);padding:20px 24px}
+.stat-num{font-size:26px;font-weight:700;color:var(--text);font-family:var(--mono);letter-spacing:-1px}
+.stat-label{font-size:12px;color:var(--muted);margin-top:2px}
+
+.section{padding:0 24px 72px;max-width:900px;margin:0 auto}
+.section-label{font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--lime);margin-bottom:12px;font-family:var(--mono)}
+.section-title{font-size:30px;font-weight:700;letter-spacing:-1px;color:var(--text);margin-bottom:8px}
+.section-sub{font-size:15px;color:var(--muted);margin-bottom:40px;max-width:420px}
+
+.dashboard-mock{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:64px}
+.dash-header{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.dash-title{font-size:13px;font-weight:600;color:var(--text)}
+.dash-actions{display:flex;gap:8px}
+.dash-btn{font-size:12px;color:var(--muted);background:var(--hint);border:none;padding:5px 12px;border-radius:5px;cursor:pointer;font-family:var(--sans)}
+.dash-btn.accent{background:var(--lime);color:#0A0E00;font-weight:600}
+.dash-body{padding:0}
+.dash-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 80px;align-items:center;padding:13px 20px;border-bottom:1px solid var(--border);gap:12px}
+.dash-row:last-child{border-bottom:none}
+.dash-row.header{padding:10px 20px;background:rgba(255,255,255,0.02)}
+.col-label{font-size:11px;font-weight:500;color:var(--hint);text-transform:uppercase;letter-spacing:0.06em}
+.db-name{font-size:13px;font-weight:500;color:var(--text)}
+.db-type{font-size:11px;color:var(--muted);font-family:var(--mono)}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;padding:3px 8px;border-radius:99px;font-family:var(--mono)}
+.badge-ok{background:rgba(184,242,65,0.1);color:#8FC41A}
+.badge-fail{background:var(--red-dim);color:var(--red)}
+.badge-run{background:rgba(79,142,247,0.1);color:#4F8EF7}
+.badge-dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+.badge-run .badge-dot{animation:pulse 1s infinite}
+.ts{font-size:12px;color:var(--muted);font-family:var(--mono)}
+.sz{font-size:12px;color:var(--muted);font-family:var(--mono)}
+.act-btn{font-size:11px;color:var(--muted);background:var(--border);border:none;padding:4px 10px;border-radius:5px;cursor:pointer;font-family:var(--sans)}
+
+.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:0}
+.how-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px}
+.how-num{font-size:11px;font-weight:600;font-family:var(--mono);color:var(--lime);margin-bottom:16px;letter-spacing:0.05em}
+.how-icon{width:36px;height:36px;background:var(--lime-dim2);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;color:var(--lime);font-size:18px}
+.how-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px}
+.how-desc{font-size:13px;color:var(--muted);line-height:1.55}
+
+.terminal{background:#080A0D;border:1px solid var(--border);border-radius:12px;padding:20px 24px;font-family:var(--mono);font-size:13px;line-height:1.8;margin-bottom:64px}
+.term-bar{display:flex;gap:6px;margin-bottom:16px}
+.dot{width:10px;height:10px;border-radius:50%}
+.dot-r{background:#FF5F56}
+.dot-y{background:#FFBD2E}
+.dot-g{background:#27C93F}
+.term-comment{color:var(--hint)}
+.term-cmd{color:var(--text)}
+.term-prompt{color:var(--lime)}
+.term-out{color:var(--muted)}
+.term-ok{color:var(--lime)}
+.term-err{color:var(--red)}
+
+.pricing{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:0}
+.plan{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;position:relative}
+.plan.featured{border-color:rgba(184,242,65,0.3);background:linear-gradient(180deg,rgba(184,242,65,0.04) 0%,var(--surface) 100%)}
+.plan-badge{position:absolute;top:-1px;left:50%;transform:translateX(-50%);background:var(--lime);color:#0A0E00;font-size:10px;font-weight:700;padding:3px 12px;border-radius:0 0 8px 8px;letter-spacing:0.05em;font-family:var(--mono)}
+.plan-name{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;font-family:var(--mono)}
+.plan-price{font-size:32px;font-weight:800;color:var(--text);letter-spacing:-1.5px;line-height:1;margin-bottom:4px;font-family:var(--mono)}
+.plan-price span{font-size:14px;font-weight:400;color:var(--muted);letter-spacing:0}
+.plan-sub{font-size:12px;color:var(--muted);margin-bottom:20px}
+.plan-divider{border:none;border-top:1px solid var(--border);margin:16px 0}
+.plan-feat{font-size:12px;color:var(--muted);padding:4px 0;display:flex;align-items:center;gap:8px}
+.plan-feat-ok{color:var(--lime);font-size:13px}
+.plan-btn{display:block;text-align:center;padding:9px;border-radius:7px;font-size:13px;font-weight:600;text-decoration:none;margin-top:20px;transition:opacity 0.15s}
+.plan-btn-ghost{background:var(--border);color:var(--muted)}
+.plan-btn-ghost:hover{opacity:0.8}
+.plan-btn-accent{background:var(--lime);color:#0A0E00}
+.plan-btn-accent:hover{opacity:0.88}
+
+footer{border-top:1px solid var(--border);padding:24px;display:flex;align-items:center;justify-content:space-between;max-width:900px;margin:0 auto}
+.foot-copy{font-size:12px;color:var(--hint)}
+.foot-links{display:flex;gap:16px}
+.foot-link{font-size:12px;color:var(--hint);text-decoration:none}
+.foot-link:hover{color:var(--muted)}
+</style>
+
+<h2 class="sr-only">Snapvault — landing page de backup automático de banco de dados</h2>
+
+<nav>
+  <div class="logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="2" width="12" height="9" rx="2" stroke="#0A0E00" stroke-width="1.5"/>
+        <path d="M5 14h6M8 11v3" stroke="#0A0E00" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M5.5 6.5L7.5 8.5L10.5 5.5" stroke="#0A0E00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <span class="logo-name">snapvault</span>
+  </div>
+  <div class="nav-links">
+    <a class="nav-link" href="#">Como funciona</a>
+    <a class="nav-link" href="#">Preços</a>
+    <a class="nav-link" href="#">Docs</a>
+    <a class="btn-nav" href="#">Começar grátis</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-badge"><span></span>Rodando 24/7 — backup em andamento</div>
+  <h1>Seu banco de dados<br>nunca mais some <em>de vez.</em></h1>
+  <p class="hero-sub">Backup automático de MySQL e PostgreSQL, todo dia, criptografado. Alerta no WhatsApp se falhar. Restaura em 1 clique.</p>
+  <div class="hero-actions">
+    <a class="btn-primary" href="#">Testar 14 dias grátis →</a>
+    <a class="btn-ghost" href="#">Ver como funciona</a>
+  </div>
+  <p class="hero-note">// sem cartão de crédito · cancela quando quiser · configura em 3 min</p>
+</div>
+
+<div class="page" style="margin-bottom:24px">
+  <div class="stats-strip">
+    <div class="stat"><div class="stat-num">99.8%</div><div class="stat-label">backups bem-sucedidos</div></div>
+    <div class="stat"><div class="stat-num">&lt; 2min</div><div class="stat-label">tempo médio de backup</div></div>
+    <div class="stat"><div class="stat-num">AES-256</div><div class="stat-label">criptografia de ponta a ponta</div></div>
+  </div>
+</div>
+
+<div class="page" style="padding-top:64px">
+  <div class="section-label">painel</div>
+  <div class="section-title">Visão clara de tudo.</div>
+  <p class="section-sub" style="margin-bottom:24px">Veja o status de cada banco, quando foi o último backup e baixe qualquer versão dos últimos 30 dias.</p>
+</div>
+
+<div class="page">
+  <div class="dashboard-mock">
+    <div class="dash-header">
+      <span class="dash-title">Meus bancos</span>
+      <div class="dash-actions">
+        <button class="dash-btn">Histórico</button>
+        <button class="dash-btn accent">+ Adicionar banco</button>
+      </div>
+    </div>
+    <div class="dash-row header">
+      <span class="col-label">banco</span>
+      <span class="col-label">último backup</span>
+      <span class="col-label">tamanho</span>
+      <span class="col-label">status</span>
+      <span class="col-label"></span>
+    </div>
+    <div class="dash-row">
+      <div><div class="db-name">Loja do João</div><div class="db-type">mysql · 192.168.1.10:3306</div></div>
+      <span class="ts">hoje, 02:14</span>
+      <span class="sz">4.2 MB</span>
+      <span class="badge badge-ok"><span class="badge-dot"></span>OK</span>
+      <button class="act-btn">download</button>
+    </div>
+    <div class="dash-row">
+      <div><div class="db-name">App da Maria</div><div class="db-type">postgres · 10.0.0.5:5432</div></div>
+      <span class="ts">hoje, 02:31</span>
+      <span class="sz">18.7 MB</span>
+      <span class="badge badge-ok"><span class="badge-dot"></span>OK</span>
+      <button class="act-btn">download</button>
+    </div>
+    <div class="dash-row">
+      <div><div class="db-name">ERP Construtora</div><div class="db-type">mysql · 172.16.0.3:3306</div></div>
+      <span class="ts">rodando agora</span>
+      <span class="sz">—</span>
+      <span class="badge badge-run"><span class="badge-dot"></span>backup</span>
+      <button class="act-btn" style="opacity:0.4" disabled>aguarde</button>
+    </div>
+    <div class="dash-row">
+      <div><div class="db-name">API Produção</div><div class="db-type">postgres · 10.0.1.8:5432</div></div>
+      <span class="ts">ontem, 02:14</span>
+      <span class="sz">—</span>
+      <span class="badge badge-fail"><span class="badge-dot"></span>falhou</span>
+      <button class="act-btn" style="color:var(--red)">ver erro</button>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+  <div class="section-label">instalação</div>
+  <div class="section-title">Configura em 3 minutos.</div>
+  <p class="section-sub" style="margin-bottom:20px">Um comando no servidor do cliente. O resto é automático.</p>
+  <div class="terminal">
+    <div class="term-bar"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+    <div><span class="term-comment"># 1. instala o agente no servidor do cliente</span></div>
+    <div><span class="term-prompt">$</span> <span class="term-cmd">npm install -g @snapvault/agent</span></div>
+    <div style="margin-top:8px"><span class="term-comment"># 2. conecta com o token da conta</span></div>
+    <div><span class="term-prompt">$</span> <span class="term-cmd">snapvault init --token sv_live_xk9mPq3...</span></div>
+    <div style="margin-top:8px;color:var(--muted)">  Conectando ao banco... <span style="color:var(--lime)">✓</span></div>
+    <div style="color:var(--muted)">  Configurando backup diário às 02:00... <span style="color:var(--lime)">✓</span></div>
+    <div style="color:var(--muted)">  Executando backup inicial... <span style="color:var(--lime)">✓</span></div>
+    <div style="margin-top:4px"><span class="term-ok">✓ Snapvault ativo. Próximo backup em 23h 47min.</span></div>
+  </div>
+</div>
+
+<div class="page">
+  <div class="section-label">como funciona</div>
+  <div class="section-title">Simples por design.</div>
+  <p class="section-sub" style="margin-bottom:28px">Sem complicação. Sem configuração absurda.</p>
+  <div class="how-grid" style="margin-bottom:64px">
+    <div class="how-card">
+      <div class="how-num">01</div>
+      <div class="how-icon"><i class="ti ti-database" aria-hidden="true"></i></div>
+      <div class="how-title">Cadastre o banco</div>
+      <div class="how-desc">Informe host, usuário e senha. Testamos a conexão na hora antes de salvar qualquer coisa.</div>
+    </div>
+    <div class="how-card">
+      <div class="how-num">02</div>
+      <div class="how-icon"><i class="ti ti-clock" aria-hidden="true"></i></div>
+      <div class="how-title">Backup todo dia</div>
+      <div class="how-desc">Todo dia de madrugada, fazemos dump, comprimimos, criptografamos e enviamos pro armazenamento seguro.</div>
+    </div>
+    <div class="how-card">
+      <div class="how-num">03</div>
+      <div class="how-icon"><i class="ti ti-bell" aria-hidden="true"></i></div>
+      <div class="how-title">Você é avisado</div>
+      <div class="how-desc">Sucesso ou falha, você recebe email ou WhatsApp. Se falhar, o alerta vem em minutos, não no dia seguinte.</div>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+  <div class="section-label">preços</div>
+  <div class="section-title">Sem surpresa no boleto.</div>
+  <p class="section-sub" style="margin-bottom:28px">Cancela quando quiser. Sem multa, sem fidelidade.</p>
+  <div class="pricing" style="margin-bottom:64px">
+    <div class="plan">
+      <div class="plan-name">starter</div>
+      <div class="plan-price">R$29<span>/mês</span></div>
+      <div class="plan-sub">Para começar</div>
+      <hr class="plan-divider">
+      <div class="plan-feat"><span class="plan-feat-ok">✓</span>1 banco de dados</div>
+      <div class="plan-feat"><span class="plan-feat-ok">✓</span>Backup diário</div>
+      <div class="plan-feat"><span class="plan-feat-ok">✓</span>Retenção 7 dias</div>
+      <div class="plan-feat"><span class="plan-feat-ok">✓</span>Alertas por email</div>
+      <div class="plan-feat" style="opacity:0.35"><span>✗</span>WhatsApp</div>
+      <a class="plan-btn plan-btn-ghost" href="#">Começar grátis</a>
+    </div>
+    <div class="plan featured">
+      <div class="plan-badge">MAIS USADO</div>
+      <div class="plan-name" style="margin-top:8px">pro</div>
+      <div class="plan-price">R$79<span>/mês</span></div>
+      <div class="plan-sub">Para agências e freelancers</div>
+      <hr class="plan-divider">
+      <div class="plan-feat"><span class="plan-feat-ok">✓</span>5 bancos de dados</div>
+      <div class="plan-feat"><span class="plan-feat-ok">✓</span>Backup diário</div>
+      <div class="plan-feat"><span class="plan-feat-ok">✓</span>Retenção 30 dias</div>
+      <div class="plan-feat"><span class="plan-feat-ok">✓</span>Alertas por email</div>
+      <div class="plan-feat"><span class="plan-feat-ok">✓</span>Alertas no WhatsApp</div>
+      <a class="plan-btn plan-btn-accent" href="#">Começar grátis</a>
+    </div>
+    <div class="plan">
+      <div class="plan-name">business</div>
+      <div class="plan-price">R$199<span>/mês</span></div>
+      <div class="plan-sub">Para times e empresas</div>
+      <hr class="plan-divider">
+      <div class="plan-feat"><span class="plan-feat-ok">✓</span>Bancos ilimitados</div>
+      <div class="plan-feat"><span class="plan-feat-ok">✓</span>Backup a cada 6h</div>
+      <div class="plan-feat"><span class="plan-feat-ok">✓</span>Retenção 90 dias</div>
+      <div class="plan-feat"><span class="plan-feat-ok">✓</span>Email + WhatsApp</div>
+      <div class="plan-feat"><span class="plan-feat-ok">✓</span>Suporte prioritário</div>
+      <a class="plan-btn plan-btn-ghost" href="#">Falar com a gente</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span class="foot-copy">© 2025 Snapvault. Feito no Brasil.</span>
+  <div class="foot-links">
+    <a class="foot-link" href="#">Privacidade</a>
+    <a class="foot-link" href="#">Termos</a>
+    <a class="foot-link" href="#">Status</a>
+    <a class="foot-link" href="#">Contato</a>
+  </div>
+</footer>

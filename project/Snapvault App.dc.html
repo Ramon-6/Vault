@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:#EFEEEA;color:#0C0C0A;font-family:'DM Sans','Inter',sans-serif;font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased}
+input,button,select,textarea{font-family:inherit}
+button{cursor:pointer}
+a{color:inherit;text-decoration:none}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#D4D2CC;border-radius:3px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-7px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+</helmet>
+
+<!-- TOAST -->
+<sc-if value="{{ hasNotif }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;top:20px;right:20px;z-index:9999;background:#FFFFFF;border:1px solid #E6E4DE;border-radius:var(--sv-r-md);padding:12px 16px;font-size:13px;color:#0C0C0A;box-shadow:0 8px 32px rgba(0,0,0,.6);display:flex;align-items:center;gap:10px;animation:slideDown .2s ease;min-width:280px;max-width:420px">
+    <sc-if value="{{ notifIsSuccess }}" hint-placeholder-val="{{ true }}">
+      <span style="color:var(--sv-accent);font-size:16px;flex-shrink:0">✓</span>
+    </sc-if>
+    <sc-if value="{{ notifIsError }}" hint-placeholder-val="{{ false }}">
+      <span style="color:#FF4757;font-size:16px;flex-shrink:0">✗</span>
+    </sc-if>
+    <span style="line-height:1.45">{{ notifMsg }}</span>
+  </div>
+</sc-if>
+
+<!-- CONFIRM DELETE MODAL -->
+<sc-if value="{{ showConfirmDelete }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;animation:fadeIn .15s ease">
+    <div style="background:#FFFFFF;border:1px solid #E6E4DE;border-radius:var(--sv-r-lg);padding:28px;width:420px;box-shadow:0 24px 60px rgba(0,0,0,.6)">
+      <div style="font-size:16px;font-weight:600;color:#0C0C0A;margin-bottom:8px">Remover banco de dados</div>
+      <p style="font-size:13px;color:#706F6B;line-height:1.7;margin-bottom:24px">Tem certeza? O banco <strong style="color:#0C0C0A;font-weight:600">{{ confirmDeleteName }}</strong> e todos os seus backups serão removidos permanentemente. Esta ação não pode ser desfeita.</p>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onClick="{{ onCancelDelete }}" style="background:#E6E4DE;color:#0C0C0A;border:none;padding:9px 18px;border-radius:var(--sv-r-md);font-size:13px;font-weight:500">Cancelar</button>
+        <button onClick="{{ onConfirmDelete }}" style="background:#FF4757;color:#fff;border:none;padding:9px 18px;border-radius:var(--sv-r-md);font-size:13px;font-weight:600">Remover permanentemente</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<!-- ═══════════════════════════════════════════════
+     AUTH SCREENS
+═══════════════════════════════════════════════ -->
+<sc-if value="{{ isAuthScreen }}" hint-placeholder-val="{{ true }}">
+  <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#F4F3EF;padding:24px">
+
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:40px">
+      <div style="width:34px;height:34px;background:var(--sv-accent);border-radius:var(--sv-r-sm);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--sv-accent-text)">
+        <svg width="18" height="18" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="9" rx="2" stroke="currentColor" stroke-width="1.5"></rect><path d="M5 14h6M8 11v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path><path d="M5.5 6.5L7.5 8.5L10.5 5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </div>
+      <span style="font-size:18px;font-weight:700;color:#0C0C0A;letter-spacing:-0.5px">snapvault</span>
+    </div>
+
+    <!-- Login -->
+    <sc-if value="{{ isLoginScreen }}" hint-placeholder-val="{{ true }}">
+      <div style="width:100%;max-width:360px;animation:slideDown .25s ease">
+        <div style="background:#FFFFFF;border:1px solid #E6E4DE;border-radius:var(--sv-r-lg);padding:32px">
+          <h1 style="font-size:20px;font-weight:700;color:#0C0C0A;margin-bottom:4px;letter-spacing:-0.4px">Entrar na sua conta</h1>
+          <p style="font-size:13px;color:#706F6B;margin-bottom:28px">Bem-vindo de volta.</p>
+
+          <div style="margin-bottom:16px">
+            <label style="font-size:12px;font-weight:500;color:#706F6B;display:block;margin-bottom:6px">E-mail</label>
+            <input type="email" defaultValue="andre@agencia.com.br" style="width:100%;background:#F8F7F4;border:1px solid #E6E4DE;border-radius:var(--sv-r-md);padding:9px 12px;color:#0C0C0A;font-size:13px;outline:none">
+          </div>
+
+          <div style="margin-bottom:24px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+              <label style="font-size:12px;font-weight:500;color:#706F6B">Senha</label>
+              <a href="#" style="font-size:12px;color:#4F8EF7">Esqueci a senha</a>
+            </div>
+            <input type="password" defaultValue="senha1234" style="width:100%;background:#F8F7F4;border:1px solid #E6E4DE;border-radius:var(--sv-r-md);padding:9px 12px;color:#0C0C0A;font-size:13px;outline:none">
+          </div>
+
+          <button onClick="{{ doLogin }}" style="width:100%;background:var(--sv-accent);color:var(--sv-accent-text);font-weight:700;font-size:14px;padding:11px;border-radius:var(--sv-r-md);border:none">Entrar →</button>
+        </div>
+        <p style="text-align:center;font-size:13px;color:#706F6B;margin-top:20px">
+          Ainda não tem conta? 
+          <button onClick="{{ goToRegister }}" style="background:none;border:none;color:var(--sv-accent);font-weight:500;font-size:13px;padding:0;cursor:pointer">Criar conta grátis</button>
+        </p>
+      </div>
+    </sc-if>
+
+    <!-- Register -->
+    <sc-if value="{{ isRegisterScreen }}" hint-placeholder-val="{{ false }}">
+      <div style="width:100%;max-width:360px;animation:slideDown .25s ease">
+        <div style="background:#FFFFFF;border:1px solid #E6E4DE;border-radius:var(--sv-r-lg);padding:32px">
+          <h1 style="font-size:20px;font-weight:700;color:#0C0C0A;margin-bottom:4px;letter-spacing:-0.4px">Criar conta grátis</h1>
+          <p style="font-size:13px;color:#706F6B;margin-bottom:28px">14 dias sem cartão de crédito.</p>
+
+          <div style="margin-bottom:16px">
+            <label style="font-size:12px;font-weight:500;color:#706F6B;display:block;margin-bottom:6px">Nome completo</label>
+            <input type="text" placeholder="André Oliveira" style="width:100%;background:#F8F7F4;border:1px solid #E6E4DE;border-radius:var(--sv-r-md);padding:9px 12px;color:#0C0C0A;font-size:13px;outline:none">
+          </div>
+          <div style="margin-bottom:16px">
+            <label style="font-size:12px;font-weight:500;color:#706F6B;display:block;margin-bottom:6px">E-mail</label>
+            <input type="email" placeholder="seu@email.com" style="width:100%;background:#F8F7F4;border:1px solid #E6E4DE;border-radius:var(--sv-r-md);padding:9px 12px;color:#0C0C0A;font-size:13px;outline:none">
+          </div>
+          <div style="margin-bottom:24px">
+            <label style="font-size:12px;font-weight:500;color:#706F6B;display:block;margin-bottom:6px">Senha</label>
+            <input type="password" placeholder="Mínimo 8 caracteres" style="width:100%;background:#F8F7F4;border:1px solid #E6E4DE;border-radius:var(--sv-r-md);padding:9px 12px;color:#0C0C0A;font-size:13px;outline:none">
+          </div>
+
+          <button onClick="{{ doRegister }}" style="width:100%;background:var(--sv-accent);color:var(--sv-accent-text);font-weight:700;font-size:14px;padding:11px;border-radius:var(--sv-r-md);border:none">Criar conta →</button>
+          <p style="font-size:11px;color:#A9A8A3;text-align:center;margin-top:14px;line-height:1.5">Ao criar conta você aceita os <a href="#" style="color:#706F6B">Termos de Uso</a> e a <a href="#" style="color:#706F6B">Privacidade</a>.</p>
+        </div>
+        <p style="text-align:center;font-size:13px;color:#706F6B;margin-top:20px">
+          Já tem conta? 
+          <button onClick="{{ goToLogin }}" style="background:none;border:none;color:var(--sv-accent);font-weight:500;font-size:13px;padding:0;cursor:pointer">Entrar</button>
+        </p>
+      </div>
+    </sc-if>
+  </div>
+</sc-if>
+
+<!-- ═══════════════════════════════════════════════
+     APP SHELL
+═══════════════════════════════════════════════ -->
+<sc-if value="{{ isAppScreen }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;height:100vh;overflow:hidden;background:#F4F3EF">
+
+    <!-- ── SIDEBAR ── -->
+    <nav style="width:224px;background:#FFFFFF;border-right:1px solid #E6E4DE;display:flex;flex-direction:column;flex-shrink:0">
+      <div style="padding:18px 16px;border-bottom:1px solid #E6E4DE">
+        <div style="display:flex;align-items:center;gap:9px">
+          <div style="width:28px;height:28px;background:var(--sv-accent);border-radius:var(--sv-r-sm);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--sv-accent-text)">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="9" rx="2" stroke="currentColor" stroke-width="1.5"></rect><path d="M5 14h6M8 11v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path><path d="M5.5 6.5L7.5 8.5L10.5 5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          </div>
+          <span style="font-size:15px;font-weight:700;color:#0C0C0A;letter-spacing:-0.4px">snapvault</span>
+        </div>
+      </div>
+
+      <div style="padding:10px 8px;flex:1;display:flex;flex-direction:column;gap:2px">
+        <div onClick="{{ goToDashboard }}" style="{{ navDashStyle }}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect></svg>
+          Visão geral
+        </div>
+        <div onClick="{{ goToDatabases }}" style="{{ navDbStyle }}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+          Meus bancos
+        </div>
+        <div onClick="{{ goToHistory }}" style="{{ navHistStyle }}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          Histórico
+        </div>
+        <div onClick="{{ goToSettings }}" style="{{ navSettStyle }}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"></path></svg>
+          Configurações
+        </div>
+      </div>
+
+      <div style="padding:12px 16px;border-top:1px solid #E6E4DE;display:flex;align-items:center;gap:10px">
+        <div style="width:30px;height:30px;background:#E6E4DE;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#706F6B;flex-shrink:0">A</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:500;color:#0C0C0A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">André Oliveira</div>
+          <div style="font-size:11px;color:#706F6B;font-family:'JetBrains Mono',monospace">Plano Pro</div>
+        </div>
+        <button onClick="{{ goToLogout }}" title="Sair" style="background:none;border:none;color:#A9A8A3;padding:4px;flex-shrink:0" style-hover="color:#706F6B">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        </button>
+      </div>
+    </nav>
+
+    <!-- ── MAIN CONTENT ── -->
+    <div style="flex:1;overflow-y:auto;min-width:0;display:flex;flex-direction:column">
+
+      <!-- ═══ DASHBOARD ═══ -->
+      <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Dashboard">
+          <div style="padding:20px 28px;border-bottom:1px solid #E6E4DE;display:flex;align-items:center;justify-content:space-between;background:#EFEEEA;position:sticky;top:0;z-index:10">
+            <div>
+              <h2 style="font-size:18px;font-weight:700;color:#0C0C0A;letter-spacing:-0.4px;font-family:'Bricolage Grotesque','Inter',sans-serif">Visão geral</h2>
+              <p style="font-size:12px;color:#706F6B;margin-top:1px">28 de junho de 2026</p>
+            </div>
+            <button onClick="{{ goToAddDb }}" style="background:var(--sv-accent);color:var(--sv-accent-text);border:none;padding:8px 16px;border-radius:var(--sv-r-md);font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Adicionar banco
+            </button>
+          </div>
+
+          <div style="padding:24px 28px">
+            <!-- Stat cards -->
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px">
+              <div style="background:#FFFFFF;border:1px solid #E6E4DE;border-radius:var(--sv-r-lg);padding:var(--sv-stat-pad)">
+                <div style="font-size:11px;font-weight:500;color:#706F6B;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Bancos ativos</div>
+                <div style="font-size:32px;font-weight:800;color:#0C0C0A;font-family:'Bricolage Grotesque','Inter',sans-serif;letter-spacing:-1.5px">{{ totalDbs }}</div>
+              </div>
+              <div style="background:#FFFFFF;border:1px solid #E6E4DE;border-radius:var(--sv-r-lg);padding:var(--sv-stat-pad)">
+                <div style="font-size:11px;font-weight:500;color:#706F6B;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Backups hoje</div>
+                <div style="font-size:32px;font-weight:800;color:#0C0C0A;font-family:'Bricolage Grotesque','Inter',sans-serif;letter-spacing:-1.5px">{{ todayCount }}</div>
+              </div>
+              <div style="background:#FFFFFF;border:1px solid #E6E4DE;border-radius:var(--sv-r-lg);padding:var(--sv-stat-pad)">
+                <div style="font-size:11px;font-weight:500;color:#706F6B;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Último backup</div>
+                <div style="font-size:32px;font-weight:800;color:#0C0C0A;font-family:'Bricolage Grotesque','Inter',sans-serif;letter-spacing:-1.5px">03:00</div>
+              </div>
+              <div style="background:#FFFFFF;border:1px solid #E6E4DE;border-radius:var(--sv-r-lg);padding:var(--sv-stat-pad)">
+                <div style="font-size:11px;font-weight:500;color:#706F6B;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Espaço usado</div>
+                <div style="font-size:32px;font-weight:800;color:#0C0C0A;font-family:'Bricolage Grotesque','Inter',sans-serif;letter-spacing:-1.5px">257 MB</div>
+              </div>
+            </div>
+
+            <!-- DB table -->
+            <div style="background:#FFFFFF;border:1px solid #E6E4DE;border-radius:var(--sv-r-lg);overflow:hidden;margin-bottom:24px">
+              <div style="padding:var(--sv-row-pad) 20px;border-bottom:1px solid #E6E4DE;display:flex;align-items:center;justify-content:space-between">
+                <span style="font-size:13px;font-weight:600;color:#0C0C0A">Meus bancos</span>
+                <button onClick="{{ goToDatabases }}" style="font-size:12px;color:#706F6B;background:none;border:none;padding:0" style-hover="color:#0C0C0A">Ver todos →</button>
+              </div>
+              <div style="display:grid;grid-template-columns:2.2fr 1fr 0.75fr 1fr 1fr 70px;padding:9px 20px;gap:12px;border-bottom:1px solid #E6E4DE;background:rgba(0,0,0,.018)">
+                <span style="font-size:11px;font-weight:500;color:#A9A8A3;text-transform:uppercase;letter-spacing:.06em">Banco</span>
+                <span style="font-size:11px;font-weight:500;color:#A9A8A3;text-transform:uppercase;letter-spacing:.06em">Último backup</span>
+                <span style="font-size:11px;font-weight:500;color:#A9A8A3;text-transform:uppercase;letter-spacing:.06em">Tam.</span>
+                <span style="font-size:11px;font-weight:500;color:#A9A8A3;text-transform:uppercase;letter-spacing:.06em">Status</span>
+                <span style="font-size:11px;font-weight:500;color:#A9A8A3;text-transform:uppercase;letter-spacing:.06em">Próx. backup</span>
+                <span></span>
+              </div>
+              <sc-for list="{{ dbs }}" as="db" hint-placeholder-count="5">
+                <div style="display:grid;grid-template-columns:2.2fr 1fr 0.75fr 1fr 1fr 70px;padding:var(--sv-row-pad) 20px;gap:12px;border-bottom:1px solid #E6E4DE;align-items:center" style-hover="background:rgba(0,0,0,.025)">
+                  <div>
+                    <div style="font-size:13px;font-weight:500;color:#0C0C0A">{{ db.name }}</div>
+                    <div style="font-size:11px;color:#706F6B;font-family:'JetBrains Mono',monospace;margin-top:1px">{{ db.hostPort }}</div>
+                  </div>
+                  <span style="font-size:12px;color:#706F6B;font-family:'JetBrains Mono',monospace">{{ db.lastFmt }}</span>
+                  <span style="font-size:12px;color:#706F6B;font-family:'JetBrains Mono',monospace">{{ db.sizeFmt }}</span>
+                  <div>
+                    <sc-if value="{{ db.isOk }}" hint-placeholder-val="{{ true }}">
+                      <span style="display:inline-flex;align-items:center;gap:5px;background:var(--sv-accent-bg);color:var(--sv-accent-ok);font-size:11px;font-weight:500;padding:3px 9px;border-radius:99px;font-family:'JetBrains Mono',monospace"><span style="width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block"></span>OK</span>
+                    </sc-if>
+                    <sc-if value="{{ db.isFail }}" hint-placeholder-val="{{ false }}">
+                      <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,71,87,.1);color:#FF4757;font-size:11px;font-weight:500;padding:3px 9px;border-radius:99px;font-family:'JetBrains Mono',monospace"><span style="width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block"></span>Falhou</span>
+                    </sc-if>
+                    <sc-if value="{{ db.isRun }}" hint-placeholder-val="{{ false }}">
+                      <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(79,142,247,.1);color:#4F8EF7;font-size:11px;font-weight:500;padding:3px 9px;border-radius:99px;font-family:'JetBrains Mono',monospace"><span style="width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block;animation:pulse 1s infinite"></span>Backup</span>
+                    </sc-if>
+                  </div>
+                  <span style="font-size:12px;color:#A9A8A3;font-family:'JetBrains Mono',monospace">{{ db.nextFmt }}</span>
+                  <div style="display:flex;gap:5px">
+                    <sc-if value="{{ db.isOk }}" hint-placeholder-val="{{ true }}">
+                      <button onClick="{{ db.onDownload }}" style="background:#E6E4DE;color:#706F6B;border:none;padding:5px 9px;border-radius:var(--sv-r-sm);font-size:12px" style-hover="background:#D4D2CC;color:#0C0C0A" title="Download">↓</button>
+                    </sc-if>
+                    <sc-if value="{{ db.isFail }}" hint-placeholder-val="{{ false }}">
+                      <button onClick="{{ db.onShowErr }}" style="background:rgba(255,71,87,.08);color:#FF4757;border:none;padding:5px 9px;border-radius:var(--sv-r-sm);font-size:11px" title="Ver erro">!</button>
+                    </sc-if>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+
+            <!-- Recent activity -->
+            <div style="background:#FFFFFF;border:1px solid #E6E4DE;border-radius:var(--sv-r-lg);overflow:hidden">
+              <div style="padding:var(--sv-row-pad) 20px;border-bottom:1px solid #E6E4DE;display:flex;align-items:center;justify-content:space-between">
+                <span style="font-size:13px;font-weight:600;color:#0C0C0A">Atividade recente</span>
+                <button onClick="{{ goToHistory }}" style="font-size:12px;color:#706F6B;background:none;border:none;padding:0" style-hover="color:#0C0C0A">Ver histórico →</button>
+              </div>
+              <sc-for list="{{ recentBackups }}" as="b" hint-placeholder-count="5">
+                <div style="display:flex;align-items:center;padding:var(--sv-row-pad) 20px;border-bottom:1px solid #E6E4DE;gap:12px" style-hover="background:rgba(0,0,0,.025)">
+                  <sc-if value="{{ b.isOk }}" hint-placeholder-val="{{ true }}">
+                    <span style="width:22px;height:22px;border-radius:50%;background:var(--sv-accent-bg);display:flex;align-items:center;justify-content:center;color:var(--sv-accent-ok);font-size:11px;flex-shrink:0">✓</span>
+                  </sc-if>
+                  <sc-if value="{{ b.isFail }}" hint-placeholder-val="{{ false }}">
+                    <span style="width:22px;height:22px;border-radius:50%;background:rgba(255,71,87,.1);display:flex;align-items:center;justify-content:center;color:#FF4757;font-size:11px;flex-shrink:0">✗</span>
+                  </sc-if>
+                  <div style="flex:1;min-width:0">
+                    <span style="font-size:12px;font-weight:500;color:#0C0C0A">{{ b.dbName }}</span>
+                    <span style="font-size:12px;color:#A9A8A3;margin-left:8px;font-family:'JetBrains Mono',monospace">{{ b.dateFmt }}</span>
+                  </div>
+                  <span style="font-size:12px;color:#706F6B;font-family:'JetBrains Mono',monospace;flex-shrink:0">{{ b.size }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ═══ DATABASES ═══ -->
+      <sc-if value="{{ isDatabasesScreen }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Databases">
+          <div style="padding:20px 28px;border-bottom:1px solid #E6E4DE;display:flex;align-items:center;justify-content:space-between;background:#EFEEEA;position:sticky;top:0;z-index:10">
+            <div>
+              <h2 style="font-size:18px;font-weight:700;color:#0C0C0A;letter-spacing:-0.4px;font-family:'Bricolage Grotesque','Inter',sans-serif">Meus bancos</h2>
+              <p style="font-size:12px;color:#706F6B;margin-top:1px">{{ totalDbs }} de 5 slots · Plano Pro</p>
+            </div>
+            <button onClick="{{ goToAddDb }}" style="background:var(--sv-accent);color:var(--sv-accent-text);border:none;padding:8px 16px;border-radius:var(--sv-r-md);font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Adicionar banco
+            </button>
+          </div>
+          <div style="padding:24px 28px">
+            <div style="background:#FFFFFF;border:1px solid #E6E4DE;border-radius:var(--sv-r-lg);overflow:hidden">
+              <div style="display:grid;grid-template-columns:2.2fr 1fr 1fr 1fr 0.6fr 130px;padding:9px 20px;gap:12px;border-bottom:1px solid #E6E4DE;background:rgba(0,0,0,.018)">
+                <span style="font-size:11px;font-weight:500;color:#A9A8A3;text-transform:uppercase;letter-spacing:.06em">Banco</span>
+                <span style="font-size:11px;font-weight:500;color:#A9A8A3;text-transform:uppercase;letter-spacing:.06em">Status</span>
+                <span style="font-size:11px;font-weight:500;color:#A9A8A3;text-transform:uppercase;letter-spacing:.06em">Último backup</span>
+                <span style="font-size:11px;font-weight:500;color:#A9A8A3;text-transform:uppercase;letter-spacing:.06em">Próx. backup</span>
+                <span style="font-size:11px;font-weight:500;color:#A9A8A3;text-transform:uppercase;letter-spacing:.06em">Ret.</span>
+                <span></span>
+              </div>
+              <sc-for list="{{ dbs }}" as="db" hint-placeholder-count="5">
+                <div style="display:grid;grid-template-columns:2.2fr 1fr 1fr 1fr 0.6fr 130px;padding:var(--sv-row-pad) 20px;gap:12px;border-bottom:1px solid #E6E4DE;align-items:center" style-hover="background:rgba(0,0,0,.025)">
+                  <div>
+                    <div style="font-size:13px;font-weight:500;color:#0C0C0A;margin-bottom:2px">{{ db.name }}</div>
+                    <div style="font-size:11px;color:#706F6B;font-family:'JetBrains Mono',monospace">{{ db.hostPort }}</div>
+                  </div>
+                  <div>
+                    <sc-if value="{{ db.isOk }}" hint-placeholder-val="{{ true }}">
+                      <span style="display:inline-flex;align-items:center;gap:5px;background:var(--sv-accent-bg);color:var(--sv-accent-ok);font-size:11px;font-weight:500;padding:3px 9px;border-radius:99px;font-family:'JetBrains Mono',monospace"><span style="width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block"></span>OK</span>
+                    </sc-if>
+                    <sc-if value="{{ db.isFail }}" hint-placeholder-val="{{ false }}">
+                      <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,71,87,.1);color:#FF4757;font-size:11px;font-weight:500;padding:3px 9px;border-radius:99px;font-family:'JetBrains Mono',monospace"><span style="width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block"></span>Falhou</span>
+                    </sc-if>
+                    <sc-if value="{{ db.isRun }}" hint-placeholder-val="{{ false }}">
+                      <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(79,142,247,.1);color:#4F8EF7;font-size:11px;font-weight:500;padding:3px 9px;border-radius:99px;font-family:'JetBrains Mono',monospace"><span style="width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block;animation:pulse 1s infinite"></span>Backup</span>
+                    </sc-if>
+                  </div>
+                  <span style="font-size:12px;color:#706F6B;font-family:'JetBrains Mono',monospace">{{ db.lastFmt }}</span>
+                  <span style="font-size:12px;color:#A9A8A3;font-family:'JetBrains Mono',monospace">{{ db.nextFmt }}</span>
+                  <span style="font-size:12px;color:#706F6B;font-family:'JetBrains Mono',monospace">{{ db.retFmt }}</span>
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <button onClick="{{ db.onTest }}" style="background:#E6E4DE;color:#706F6B;border:none;padding:5px 10px;border-radius:var(--sv-r-sm);font-size:11px;font-weight:500" style-hover="background:#D4D2CC;color:#0C0C0A">Testar</button>
+                    <sc-if value="{{ db.isOk }}" hint-placeholder-val="{{ true }}">
+                      <button onClick="{{ db.onDownload }}" style="background:#E6E4DE;color:#706F6B;border:none;padding:5px 9px;border-radius:var(--sv-r-sm);font-size:12px" style-hover="background:#D4D2CC;color:#0C0C0A" title="Download">↓</button>
+                    </sc-if>
+                    <button onClick="{{ db.onDelete }}" style="background:transparent;color:#A9A8A3;border:none;padding:5px 8px;border-radius:var(--sv-r-sm);font-size:15px;line-height:1" style-hover="color:#C43030;background:rgba(220,50,47,.07)" title="Remover">×</button>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ═══ ADD DATABASE ═══ -->
+      <sc-if value="{{ isAddDbScreen }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Add Database">
+          <div style="padding:18px 28px 16px;border-bottom:1px solid #E6E4DE;background:#EFEEEA;position:sticky;top:0;z-index:10">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+              <button onClick="{{ goToDatabases }}" style="background:none;border:none;color:#706F6B;font-size:13px;display:flex;align-items:center;gap:4px;padding:0" style-hover="color:#0C0C0A">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                Cancelar
+              </button>
+              <span style="color:#E6E4DE">·</span>
+              <h2 style="font-size:16px;font-weight:700;color:#0C0C0A;letter-spacing:-0.3px">Adicionar banco de dados</h2>
+            </div>
+            <!-- Step indicator -->
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="{{ step1Style }}">
+                <sc-if value="{{ step1Done }}" hint-placeholder-val="{{ false }}">✓</sc-if>
+                <sc-if value="{{ step1Active }}" hint-placeholder-val="{{ true }}">1</sc-if>
+              </div>
+              <span style="{{ step1LblStyle }}">Conexão</span>
+              <div style="{{ line1Style }}"></div>
+              <div style="{{ step2Style }}">
+                <sc-if value="{{ step2Done }}" hint-placeholder-val="{{ false }}">✓</sc-if>
+                <sc-if value="{{ step2NotDone }}" hint-placeholder-val="{{ true }}">2</sc-if>
+              </div>
+              <span style="{{ step2LblStyle }}">Backup</span>
+              <div style="{{ line2Style }}"></div>
+              <div style="{{ step3Style }}">3</div>
+              <span style="{{ step3LblStyle }}">Agente</span>
+            </div>
+          </div>
+
+          <div style="padding:32px 28px;max-width:560px">
+
+            <!-- Step 1: Connection -->
+            <sc-if value="{{ isStep1 }}" hint-placeholder-val="{{ true }}">
+              <div style="animation:slideDown .2s ease">
+                <h3 style="font-size:15px;font-weight:600;color:#0C0C0A;margin-bottom:4px">Informações de conexão</h3>
+                <p style="font-size:13px;color:#706F6B;margin-bottom:24px">Testamos a conexão antes de salvar qualquer dado.</p>
+
+                <div style="margin-bottom:16px">
+                  <label style="font-size:12px;font-weight:500;color:#706F6B;display:block;margin-bottom:6px">Nome amigável</label>
+                  <input type="text" placeholder="ex: Banco do Cliente João" style="width:100%;background:#F8F7F4;border:1px solid #E6E4DE;border-radius:var(--sv-r-md);padding:9px 12px;color:#0C0C0A;font-size:13px;outline:none">
+                </div>
+
+                <div style="margin-bottom:16px">
+                  <label style="font-size:12px;font-weight:500;color:#706F6B;display:block;margin-bottom:8px">Tipo de banco</label>
+                  <div style="display:flex;gap:8px">
+                    <div style="flex:1;background:#F8F7F4;border:1px solid var(--sv-accent);border-radius:var(--sv-r-md);padding:10px 14px;display:flex;align-items:center;gap:8px;cursor:pointer">
+                      <div style="width:18px;height:18px;border-radius:50%;background:var(--sv-accent);display:flex;align-items:center;justify-content:center"><div style="width:7px;height:7px;border-radius:50%;background:var(--sv-accent-text)"></div></div>
+                      <span style="font-size:13px;font-weight:500;color:#0C0C0A">MySQL</span>
+                    </div>
+                    <div style="flex:1;background:#F8F7F4;border:1px solid #E6E4DE;border-radius:var(--sv-r-md);padding:10px 14px;display:flex;align-items:center;gap:8px;cursor:pointer" style-hover="border-color:#D4D2CC">
+                      <div style="width:18px;height:18px;border-radius:50%;border:2px solid #D4D2CC"></div>
+                      <span style="font-size:13px;color:#706F6B">PostgreSQL</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 120px;gap:12px;margin-bottom:16px">
+                  <div>
+                    <label style="font-size:12px;font-weight:500;color:#706F6B;display:block;margin-bottom:6px">Host</label>
+                    <input type="text" placeholder="192.168.1.10" style="width:100%;background:#F8F7F4;border:1px solid #E6E4DE;border-radius:var(--sv-r-md);padding:9px 12px;color:#0C0C0A;font-size:13px;outline:none;font-family:'JetBrains Mono',monospace">
+                  </div>
+                  <div>
+                    <label style="font-size:12px;font-weight:500;color:#706F6B;display:block;margin-bottom:6px">Porta</label>
+                    <input type="number" defaultValue="3306" style="width:100%;background:#F8F7F4;border:1px solid #E6E4DE;border-radius:var(--sv-r-md);padding:9px 12px;color:#0C0C0A;font-size:13px;outline:none;font-family:'JetBrains Mono',monospace">
+                  </div>
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+                  <div>
+                    <label style="font-size:12px;font-weight:500;color:#706F6B;display:block;margin-bottom:6px">Banco de dados</label>
+                    <input type="text" placeholder="nome_do_banco" style="width:100%;background:#F8F7F4;border:1px solid #E6E4DE;border-radius:var(--sv-r-md);padding:9px 12px;color:#0C0C0A;font-size:13px;outline:none;font-family:'JetBrains Mono',monospace">
+                  </div>
+                  <div>
+                    <label style="font-size:12px;font-weight:500;color:#706F6B;display:block;margin-bottom:6px">Usuário</label>
+                    <input type="text" placeholder="db_user" style="width:100%;background:#F8F7F4;border:1px solid #E6E4DE;border-radius:var(--sv-r-md);padding:9px 12px;color:#0C0C0A;font-size:13px;outline:none;font-family:'JetBrains Mono',monospace">
+                  </div>
+                </div>
+
+                <div style="margin-bottom:20px">
+                  <label style="font-size:12px;font-weight:500;color:#706F6B;display:block;margin-bottom:6px">Senha</label>
+                  <input type="password" placeholder="••••••••••••" style="width:100%;background:#F8F7F4;border:1px solid #E6E4DE;border-radius:var(--sv-r-md);padding:9px 12px;color:#0C0C0A;font-size:13px;outline:none">
+                  <p style="font-size:11px;color:#A9A8A3;margin-top:6px">Armazenada com criptografia AES-256-GCM. Nunca exibida em texto puro.</p>
+                </div>
+
+                <!-- Test connection -->
+                <div style="background:#F8F7F4;border:1px solid #E6E4DE;border-radius:var(--sv-r-md);padding:16px;margin-bottom:24px">
+                  <sc-if value="{{ tcIdle }}" hint-placeholder-val="{{ true }}">
+                    <div style="display:flex;align-items:center;justify-content:space-between">
+                      <div>
+                        <div style="font-size:13px;font-weight:500;color:#0C0C0A;margin-bottom:2px">Testar conexão</div>
+                        <div style="font-size:12px;color:#706F6B">Verifica acesso ao banco antes de continuar.</div>
+                      </div>
+                      <button onClick="{{ testConn }}" style="background:#E6E4DE;color:#0C0C0A;border:none;padding:8px 16px;border-radius:var(--sv-r-md);font-size:12px;font-weight:500;flex-shrink:0;margin-left:16px" style-hover="background:#D4D2CC">Testar →</button>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ tcTesting }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;align-items:center;gap:12px">
+                      <div style="width:18px;height:18px;border:2px solid #4F8EF7;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0"></div>
+                      <div>
+                        <div style="font-size:13px;font-weight:500;color:#4F8EF7">Conectando…</div>
+                        <div style="font-size:12px;color:#706F6B">Testando conexão com o banco de dados</div>
+                      </div>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ tcOk }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;align-items:center;gap:12px">
+                      <div style="width:24px;height:24px;background:var(--sv-accent-bg);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--sv-accent);font-size:13px;flex-shrink:0">✓</div>
+                      <div>
+                        <div style="font-size:13px;font-weight:500;color:var(--sv-accent)">Conexão bem-sucedida</div>
+                        <div style="font-size:12px;color:#706F6B">Banco acessível. Pode prosseguir.</div>
+                      </div>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ tcFail }}" hint-placeholder-val="{{ false }}">
+                    <div>
+                      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+                        <div style="width:24px;height:24px;background:rgba(255,71,87,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#FF4757;font-size:13px;flex-shrink:0">✗</div>
+                        <div>
+                          <div style="font-size:13px;font-weight:500;color:#FF4757">Falha na conexão</div>
+                          <div style="font-size:12px;color:#706F6B">Verifique host, porta e credenciais.</div>
+                        </div>
+                      </div>
+                      <div style="background:rgba(255,71,87,.06);border:1px solid rgba(255,71,87,.15);border-radius:var(--sv-r-sm);padding:10px 12px;font-size:12px;color:#FF4757;font-family:'JetBrains Mono',monospace;margin-bottom:10px">Error: Connection refused after 10s timeout</div>
+                      <button onClick="{{ testConn }}" style="background:transparent;color:#706F6B;border:1px solid #E6E4DE;padding:6px 14px;border-radius:var(--sv-r-sm);font-size:12px" style-hover="border-color:#D4D2CC;color:#0C0C0A">Tentar novamente</button>
+                    </div>
+                  </sc-if>
+                </div>
+
+                <div style="display:flex;justify-content:flex-end;gap:10px">
+                  <button onClick="{{ goToDatabases }}" style="background:#E6E4DE;color:#706F6B;border:none;padding:10px 20px;border-radius:var(--sv-r-md);font-size:13px;font-weight:500" style-hover="background:#D4D2CC;color:#0C0C0A">Cancelar</button>
+                  <button onClick="{{ nextStep }}" style="{{ nextBtnStyle }}">Próximo →</button>
+                </div>
+              </div>
+            </sc-if>
+
+            <!-- Step 2: Config -->
+            <sc-if value="{{ isStep2 }}" hint-placeholder-val="{{ false }}">
+              <div style="animation:slideDown .2s ease">
+                <h3 style="font-size:15px;font-weight:600;color:#0C0C0A;margin-bottom:4px">Configuração do backup</h3>
+                <p style="font-size:13px;color:#706F6B;margin-bottom:24px">Quando e como o backup deve ser executado.</p>
+
+                <div style="margin-bottom:20px">
+                  <label style="font-size:12px;font-weight:500;color:#706F6B;display:block;margin-bottom:8px">Horário do backup</label>
+                  <select style="width:100%;background:#F8F7F4;border:1px solid #E6E4DE;border-radius:var(--sv-r-md);padding:9px 12px;color:#0C0C0A;font-size:13px;outline:none;cursor:pointer">
+                    <option value="0 2 * * *">02:00 — Madrugada (recomendado)</option>
+                    <option value="0 3 * * *">03:00 — Madrugada</option>
+                    <option value="0 6 * * *">06:00 — Manhã cedo</option>
+                    <option value="0 12 * * *">12:00 — Meio-dia</option>
+                    <option value="0 22 * * *">22:00 — Noite</option>
+                  </select>
+                  <p style="font-size:11px;color:#A9A8A3;margin-top:6px">Horário de Brasília (UTC−3).</p>
+                </div>
+
+                <div style="margin-bottom:20px">
+                  <label style="font-size:12px;font-weight:500;color:#706F6B;display:block;margin-bottom:8px">Retenção dos backups</label>
+                  <div style="display:flex;gap:8px">
+                    <div style="padding:8px 16px;border-radius:var(--sv-r-md);background:#E6E4DE;color:#A9A8A3;font-size:12px;border:1px solid #E6E4DE;cursor:not-allowed;opacity:.5">7 dias</div>
+                    <div style="padding:8px 16px;border-radius:var(--sv-r-md);background:var(--sv-accent-bg);color:var(--sv-accent);font-size:12px;border:1px solid var(--sv-accent-border);cursor:pointer;font-weight:500">30 dias</div>
+                    <div style="padding:8px 16px;border-radius:var(--sv-r-md);background:#E6E4DE;color:#A9A8A3;font-size:12px;border:1px solid #E6E4DE;cursor:not-allowed;opacity:.5">90 dias</div>
+                  </div>
+                  <p style="font-size:11px;color:#A9A8A3;margin-top:8px">Retenção de 30 dias incluída no Plano Pro.</p>
+                </div>
+
+                <div style="background:#F8F7F4;border:1px solid #E6E4DE;border-radius:var(--sv-r-md);overflow:hidden;margin-bottom:24px">
+                  <div style="padding:14px 16px;border-bottom:1px solid #E6E4DE;display:flex;align-items:center;justify-content:space-between">
+                    <div>
+                      <div style="font-size:13px;font-weight:500;color:#0C0C0A">E-mail em caso de sucesso</div>
+                      <div style="font-size:12px;color:#706F6B;margin-top:1px">Confirma quando o backup é concluído</div>
+                    </div>
+                    <div style="width:40px;height:22px;background:var(--sv-accent);border-radius:11px;position:relative;cursor:pointer;flex-shrink:0">
+                      <div style="position:absolute;top:3px;right:3px;width:16px;height:16px;background:var(--sv-accent-text);border-radius:50%"></div>
+                    </div>
+                  </div>
+                  <div style="padding:14px 16px;display:flex;align-items:center;justify-content:space-between">
+                    <div>
+                      <div style="font-size:13px;font-weight:500;color:#0C0C0A">E-mail em caso de falha</div>
+                      <div style="font-size:12px;color:#706F6B;margin-top:1px">Sempre ativo — alertas imediatos são essenciais</div>
+                    </div>
+                    <div style="width:40px;height:22px;background:var(--sv-accent);border-radius:11px;position:relative;cursor:not-allowed;flex-shrink:0;opacity:.5">
+                      <div style="position:absolute;top:3px;right:3px;width:16px;height:16px;background:var(--sv-accent-text);border-radius:50%"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="display:flex;justify-content:flex-end;gap:10px">
+                  <button onClick="{{ prevStep }}" style="background:#E6E4DE;color:#0C0C0A;border:none;padding:10px 20px;border-radius:var(--sv-r-md);font-size:13px;font-weight:500" style-hover="background:#D4D2CC">← Voltar</button>
+                  <button onClick="{{ nextStep }}" style="background:var(--sv-accent);color:var(--sv-accent-text);border:none;padding:10px 24px;border-radius:var(--sv-r-md);font-size:13px;font-weight:600">Próximo →</button>
+                </div>
+              </div>
+            </sc-if>
+
+            <!-- Step 3: Agent -->
+            <sc-if value="{{ isStep3 }}" hint-placeholder-val="{{ false }}">
+              <div style="animation:slideDown .2s ease">
+                <h3 style="font-size:15px;font-weight:600;color:#0C0C0A;margin-bottom:4px">Instalar agente</h3>
+                <p style="font-size:13px;color:#706F6B;margin-bottom:24px">O agente roda no servidor do cliente e envia os backups com segurança.</p>
+
+                <div style="background:#080A0D;border:1px solid #E6E4DE;border-radius:var(--sv-r-lg);padding:20px 22px;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.9;margin-bottom:16px">
+                  <div style="display:flex;gap:6px;margin-bottom:16px">
+                    <div style="width:10px;height:10px;border-radius:50%;background:#FF5F56"></div>
+                    <div style="width:10px;height:10px;border-radius:50%;background:#FFBD2E"></div>
+                    <div style="width:10px;height:10px;border-radius:50%;background:#27C93F"></div>
+                  </div>
+                  <div style="color:#A9A8A3"># 1. instala o agente no servidor do cliente</div>
+                  <div><span style="color:var(--sv-accent)">$</span> <span style="color:#0C0C0A">npm install -g @snapvault/agent</span></div>
+                  <div style="margin-top:8px;color:#A9A8A3"># 2. inicializa com o token da conta</div>
+                  <div><span style="color:var(--sv-accent)">$</span> <span style="color:#0C0C0A">snapvault init --token sv_live_xk9mPq3...</span></div>
+                  <div style="margin-top:8px;color:#706F6B">  Conectando ao banco… <span style="color:var(--sv-accent)">✓</span></div>
+                  <div style="color:#706F6B">  Configurando backup às 02:00… <span style="color:var(--sv-accent)">✓</span></div>
+                  <div style="color:#706F6B">  Executando backup inicial… <span style="color:var(--sv-accent)">✓</span></div>
+                  <div style="margin-top:4px;color:var(--sv-accent)">✓ Snapvault ativo. Próximo backup em 23h 47min.</div>
+                </div>
+
+                <div style="display:flex;align-items:center;gap:8px;background:#F8F7F4;border:1px solid #E6E4DE;border-radius:var(--sv-r-md);padding:10px 14px;margin-bottom:20px">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B7090" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  <span style="flex:1;font-size:12px;font-family:'JetBrains Mono',monospace;color:#706F6B">sv_live_xk9mPq3R7nW2jKpL4bXz…</span>
+                  <button onClick="{{ copyToken }}" style="background:#E6E4DE;color:#0C0C0A;border:none;padding:5px 12px;border-radius:var(--sv-r-sm);font-size:11px;font-weight:500;flex-shrink:0" style-hover="background:#D4D2CC">Copiar</button>
+                </div>
+
+                <div style="background:#F8F7F4;border:1px solid #E6E4DE;border-radius:var(--sv-r-md);padding:16px;margin-bottom:24px">
+                  <div style="font-size:11px;font-weight:600;color:#706F6B;text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px">O que foi configurado</div>
+                  <div style="display:flex;flex-direction:column;gap:8px">
+                    <div style="display:flex;align-items:center;gap:10px"><span style="color:var(--sv-accent);font-size:13px;flex-shrink:0">✓</span><span style="font-size:13px;color:#0C0C0A">Banco adicionado e credenciais criptografadas</span></div>
+                    <div style="display:flex;align-items:center;gap:10px"><span style="color:var(--sv-accent);font-size:13px;flex-shrink:0">✓</span><span style="font-size:13px;color:#0C0C0A">Backup diário às 02:00 (horário de Brasília)</span></div>
+                    <div style="display:flex;align-items:center;gap:10px"><span style="color:var(--sv-accent);font-size:13px;flex-shrink:0">✓</span><span style="font-size:13px;color:#0C0C0A">Retenção de 30 dias configurada</span></div>
+                    <div style="display:flex;align-items:center;gap:10px"><span style="color:var(--sv-accent);font-size:13px;flex-shrink:0">✓</span><span style="font-size:13px;color:#0C0C0A">Alertas por e-mail ativados</span></div>
+                  </div>
+                </div>
+
+                <div style="display:flex;justify-content:flex-end;gap:10px">
+                  <button onClick="{{ prevStep }}" style="background:#E6E4DE;color:#0C0C0A;border:none;padding:10px 20px;border-radius:var(--sv-r-md);font-size:13px;font-weight:500" style-hover="background:#D4D2CC">← Voltar</button>
+                  <button onClick="{{ nextStep }}" style="background:var(--sv-accent);color:var(--sv-accent-text);border:none;padding:10px 24px;border-radius:var(--sv-r-md);font-size:13px;font-weight:600">Concluir →</button>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ═══ HISTORY ═══ -->
+      <sc-if value="{{ isHistoryScreen }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="History">
+          <div style="padding:20px 28px;border-bottom:1px solid #E6E4DE;display:flex;align-items:center;justify-content:space-between;background:#EFEEEA;position:sticky;top:0;z-index:10">
+            <div>
+              <h2 style="font-size:18px;font-weight:700;color:#0C0C0A;letter-spacing:-0.4px;font-family:'Bricolage Grotesque','Inter',sans-serif">Histórico de backups</h2>
+              <p style="font-size:12px;color:#706F6B;margin-top:1px">{{ filteredCount }} registros encontrados</p>
+            </div>
+          </div>
+          <div style="padding:24px 28px">
+            <!-- Filters -->
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap">
+              <select value="{{ histDbVal }}" onChange="{{ setHistDb }}" style="background:#FFFFFF;border:1px solid #E6E4DE;border-radius:var(--sv-r-md);padding:7px 12px;color:#0C0C0A;font-size:12px;outline:none;cursor:pointer">
+                <sc-for list="{{ dbFilterOpts }}" as="opt" hint-placeholder-count="1">
+                  <option value="{{ opt.id }}">{{ opt.name }}</option>
+                </sc-for>
+              </select>
+              <div style="display:flex;gap:6px">
+                <button onClick="{{ histAll }}" style="{{ hAllStyle }}">Todos</button>
+                <button onClick="{{ histOk }}" style="{{ hOkStyle }}">✓ Sucesso</button>
+                <button onClick="{{ histFail }}" style="{{ hFailStyle }}">✗ Falhou</button>
+              </div>
+            </div>
+
+            <div style="background:#FFFFFF;border:1px solid #E6E4DE;border-radius:var(--sv-r-lg);overflow:hidden">
+              <div style="display:grid;grid-template-columns:1.8fr 1.2fr 0.9fr 0.75fr 0.75fr 80px;padding:9px 20px;gap:12px;border-bottom:1px solid #E6E4DE;background:rgba(0,0,0,.018)">
+                <span style="font-size:11px;font-weight:500;color:#A9A8A3;text-transform:uppercase;letter-spacing:.06em">Banco</span>
+                <span style="font-size:11px;font-weight:500;color:#A9A8A3;text-transform:uppercase;letter-spacing:.06em">Data/hora</span>
+                <span style="font-size:11px;font-weight:500;color:#A9A8A3;text-transform:uppercase;letter-spacing:.06em">Status</span>
+                <span style="font-size:11px;font-weight:500;color:#A9A8A3;text-transform:uppercase;letter-spacing:.06em">Tam.</span>
+                <span style="font-size:11px;font-weight:500;color:#A9A8A3;text-transform:uppercase;letter-spacing:.06em">Duração</span>
+                <span></span>
+              </div>
+              <sc-for list="{{ filteredBackups }}" as="b" hint-placeholder-count="10">
+                <div style="display:grid;grid-template-columns:1.8fr 1.2fr 0.9fr 0.75fr 0.75fr 80px;padding:var(--sv-row-pad) 20px;gap:12px;border-bottom:1px solid #E6E4DE;align-items:center" style-hover="background:rgba(0,0,0,.025)">
+                  <span style="font-size:13px;font-weight:500;color:#0C0C0A">{{ b.dbName }}</span>
+                  <span style="font-size:12px;color:#706F6B;font-family:'JetBrains Mono',monospace">{{ b.dateFmt }}</span>
+                  <div>
+                    <sc-if value="{{ b.isOk }}" hint-placeholder-val="{{ true }}">
+                      <span style="display:inline-flex;align-items:center;gap:5px;background:var(--sv-accent-bg);color:var(--sv-accent-ok);font-size:11px;font-weight:500;padding:3px 9px;border-radius:99px;font-family:'JetBrains Mono',monospace"><span style="width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block"></span>OK</span>
+                    </sc-if>
+                    <sc-if value="{{ b.isFail }}" hint-placeholder-val="{{ false }}">
+                      <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,71,87,.1);color:#FF4757;font-size:11px;font-weight:500;padding:3px 9px;border-radius:99px;font-family:'JetBrains Mono',monospace"><span style="width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block"></span>Falhou</span>
+                    </sc-if>
+                  </div>
+                  <span style="font-size:12px;color:#706F6B;font-family:'JetBrains Mono',monospace">{{ b.size }}</span>
+                  <span style="font-size:12px;color:#706F6B;font-family:'JetBrains Mono',monospace">{{ b.duration }}</span>
+                  <div>
+                    <sc-if value="{{ b.isOk }}" hint-placeholder-val="{{ true }}">
+                      <button onClick="{{ b.onDownload }}" style="background:#E6E4DE;color:#706F6B;border:none;padding:5px 12px;border-radius:var(--sv-r-sm);font-size:12px" style-hover="background:#D4D2CC;color:#0C0C0A">↓</button>
+                    </sc-if>
+                    <sc-if value="{{ b.isFail }}" hint-placeholder-val="{{ false }}">
+                      <span style="font-size:11px;color:#FF4757;font-family:'JetBrains Mono',monospace;cursor:help" title="{{ b.error }}">ver erro</span>
+                    </sc-if>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px">
+              <span style="font-size:12px;color:#A9A8A3">Mostrando {{ filteredCount }} de {{ totalCount }} registros</span>
+              <div style="display:flex;gap:6px">
+                <button style="background:#FFFFFF;border:1px solid #E6E4DE;color:#706F6B;padding:6px 14px;border-radius:var(--sv-r-sm);font-size:12px;opacity:.4;cursor:not-allowed">← Anterior</button>
+                <button style="background:#FFFFFF;border:1px solid #E6E4DE;color:#706F6B;padding:6px 14px;border-radius:var(--sv-r-sm);font-size:12px;opacity:.4;cursor:not-allowed">Próxima →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ═══ SETTINGS ═══ -->
+      <sc-if value="{{ isSettingsScreen }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Settings">
+          <div style="padding:20px 28px;border-bottom:1px solid #E6E4DE;background:#EFEEEA;position:sticky;top:0;z-index:10">
+            <h2 style="font-size:18px;font-weight:700;color:#0C0C0A;letter-spacing:-0.4px;font-family:'Bricolage Grotesque','Inter',sans-serif">Configurações</h2>
+          </div>
+          <div style="padding:24px 28px">
+            <!-- Tabs -->
+            <div style="display:flex;gap:0;margin-bottom:28px;border-bottom:1px solid #E6E4DE">
+              <button onClick="{{ setAccTab }}" style="{{ tabAccStyle }}">Conta</button>
+              <button onClick="{{ setNotifTab }}" style="{{ tabNotifStyle }}">Notificações</button>
+              <button onClick="{{ setBillTab }}" style="{{ tabBillStyle }}">Cobrança</button>
+              <button onClick="{{ setTokTab }}" style="{{ tabTokStyle }}">Tokens de API</button>
+            </div>
+
+            <!-- Account -->
+            <sc-if value="{{ isAccTab }}" hint-placeholder-val="{{ true }}">
+              <div style="max-width:480px;animation:slideDown .2s ease">
+                <div style="margin-bottom:16px">
+                  <label style="font-size:12px;font-weight:500;color:#706F6B;display:block;margin-bottom:6px">Nome completo</label>
+                  <input type="text" defaultValue="André Oliveira" style="width:100%;background:#F8F7F4;border:1px solid #E6E4DE;border-radius:var(--sv-r-md);padding:9px 12px;color:#0C0C0A;font-size:13px;outline:none">
+                </div>
+                <div style="margin-bottom:28px">
+                  <label style="font-size:12px;font-weight:500;color:#706F6B;display:block;margin-bottom:6px">E-mail</label>
+                  <input type="email" defaultValue="andre@agencia.com.br" disabled="" style="width:100%;background:#F8F7F4;border:1px solid #E6E4DE;border-radius:var(--sv-r-md);padding:9px 12px;color:#706F6B;font-size:13px;outline:none;cursor:not-allowed;opacity:.7">
+                  <p style="font-size:11px;color:#A9A8A3;margin-top:5px">Para alterar o e-mail, entre em contato com o suporte.</p>
+                </div>
+                <div style="border-top:1px solid #E6E4DE;padding-top:24px;margin-bottom:28px">
+                  <div style="font-size:13px;font-weight:600;color:#0C0C0A;margin-bottom:16px">Alterar senha</div>
+                  <div style="margin-bottom:14px">
+                    <label style="font-size:12px;font-weight:500;color:#706F6B;display:block;margin-bottom:6px">Senha atual</label>
+                    <input type="password" placeholder="••••••••" style="width:100%;background:#F8F7F4;border:1px solid #E6E4DE;border-radius:var(--sv-r-md);padding:9px 12px;color:#0C0C0A;font-size:13px;outline:none">
+                  </div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                    <div>
+                      <label style="font-size:12px;font-weight:500;color:#706F6B;display:block;margin-bottom:6px">Nova senha</label>
+                      <input type="password" placeholder="••••••••" style="width:100%;background:#F8F7F4;border:1px solid #E6E4DE;border-radius:var(--sv-r-md);padding:9px 12px;color:#0C0C0A;font-size:13px;outline:none">
+                    </div>
+                    <div>
+                      <label style="font-size:12px;font-weight:500;color:#706F6B;display:block;margin-bottom:6px">Confirmar</label>
+                      <input type="password" placeholder="••••••••" style="width:100%;background:#F8F7F4;border:1px solid #E6E4DE;border-radius:var(--sv-r-md);padding:9px 12px;color:#0C0C0A;font-size:13px;outline:none">
+                    </div>
+                  </div>
+                </div>
+                <button onClick="{{ saveSettings }}" style="background:var(--sv-accent);color:var(--sv-accent-text);border:none;padding:9px 20px;border-radius:var(--sv-r-md);font-size:13px;font-weight:600">Salvar alterações</button>
+                <div style="margin-top:40px;padding-top:24px;border-top:1px solid rgba(255,71,87,.15)">
+                  <div style="font-size:11px;font-weight:600;color:#FF4757;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Zona de perigo</div>
+                  <p style="font-size:13px;color:#706F6B;margin-bottom:14px;line-height:1.6;max-width:380px">Ao cancelar a conta todos os backups são removidos permanentemente após 30 dias.</p>
+                  <button style="background:transparent;border:1px solid rgba(255,71,87,.25);color:#FF4757;padding:8px 16px;border-radius:var(--sv-r-md);font-size:12px;font-weight:500" style-hover="background:rgba(255,71,87,.08)">Cancelar conta</button>
+                </div>
+              </div>
+            </sc-if>
+
+            <!-- Notifications -->
+            <sc-if value="{{ isNotifTab }}" hint-placeholder-val="{{ false }}">
+              <div style="max-width:480px;animation:slideDown .2s ease">
+                <div style="background:#FFFFFF;border:1px solid #E6E4DE;border-radius:var(--sv-r-lg);overflow:hidden;margin-bottom:20px">
+                  <div style="padding:15px 20px;border-bottom:1px solid #E6E4DE;display:flex;align-items:center;justify-content:space-between">
+                    <div>
+                      <div style="font-size:13px;font-weight:500;color:#0C0C0A">E-mail em caso de sucesso</div>
+                      <div style="font-size:12px;color:#706F6B;margin-top:2px">Confirma quando cada backup é concluído</div>
+                    </div>
+                    <div style="width:40px;height:22px;background:var(--sv-accent);border-radius:11px;position:relative;cursor:pointer;flex-shrink:0">
+                      <div style="position:absolute;top:3px;right:3px;width:16px;height:16px;background:var(--sv-accent-text);border-radius:50%"></div>
+                    </div>
+                  </div>
+                  <div style="padding:15px 20px;border-bottom:1px solid #E6E4DE;display:flex;align-items:center;justify-content:space-between">
+                    <div>
+                      <div style="font-size:13px;font-weight:500;color:#0C0C0A">E-mail em caso de falha</div>
+                      <div style="font-size:12px;color:#706F6B;margin-top:2px">Sempre ativo — alertas imediatos são essenciais</div>
+                    </div>
+                    <div style="width:40px;height:22px;background:var(--sv-accent);border-radius:11px;position:relative;cursor:not-allowed;flex-shrink:0;opacity:.5">
+                      <div style="position:absolute;top:3px;right:3px;width:16px;height:16px;background:var(--sv-accent-text);border-radius:50%"></div>
+                    </div>
+                  </div>
+                  <div style="padding:15px 20px;display:flex;align-items:center;justify-content:space-between">
+                    <div>
+                      <div style="display:flex;align-items:center;gap:8px">
+                        <span style="font-size:13px;font-weight:500;color:#0C0C0A">WhatsApp</span>
+                        <span style="background:var(--sv-accent-bg);color:var(--sv-accent-ok);font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;font-family:'JetBrains Mono',monospace">PRO</span>
+                      </div>
+                      <div style="font-size:12px;color:#706F6B;margin-top:2px">Alertas no WhatsApp para falhas críticas</div>
+                    </div>
+                    <div style="width:40px;height:22px;background:#E6E4DE;border-radius:11px;position:relative;cursor:pointer;flex-shrink:0">
+                      <div style="position:absolute;top:3px;left:3px;width:16px;height:16px;background:#373B52;border-radius:50%"></div>
+                    </div>
+                  </div>
+                </div>
+                <div style="margin-bottom:20px">
+                  <label style="font-size:12px;font-weight:500;color:#706F6B;display:block;margin-bottom:6px">E-mail de destino para alertas</label>
+                  <input type="email" defaultValue="andre@agencia.com.br" style="width:100%;background:#F8F7F4;border:1px solid #E6E4DE;border-radius:var(--sv-r-md);padding:9px 12px;color:#0C0C0A;font-size:13px;outline:none">
+                </div>
+                <button onClick="{{ saveSettings }}" style="background:var(--sv-accent);color:var(--sv-accent-text);border:none;padding:9px 20px;border-radius:var(--sv-r-md);font-size:13px;font-weight:600">Salvar</button>
+              </div>
+            </sc-if>
+
+            <!-- Billing -->
+            <sc-if value="{{ isBillTab }}" hint-placeholder-val="{{ false }}">
+              <div style="max-width:520px;animation:slideDown .2s ease">
+                <div style="background:#FFFFFF;border:1px solid var(--sv-accent-border);border-radius:var(--sv-r-lg);padding:20px 24px;margin-bottom:16px;position:relative">
+                  <div style="position:absolute;top:14px;right:14px;background:var(--sv-accent-bg);color:var(--sv-accent-ok);font-size:10px;font-weight:700;padding:3px 10px;border-radius:99px;font-family:'JetBrains Mono',monospace">PLANO ATUAL</div>
+                  <div style="font-size:11px;font-weight:600;color:#706F6B;text-transform:uppercase;letter-spacing:.08em;font-family:'JetBrains Mono',monospace;margin-bottom:6px">Pro</div>
+                  <div style="font-size:32px;font-weight:800;color:#0C0C0A;letter-spacing:-1.5px;font-family:'JetBrains Mono',monospace">R$79<span style="font-size:14px;font-weight:400;color:#706F6B">/mês</span></div>
+                  <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px">
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-radius: var(--sv-r-md); background-color: #000000">
+                      <span style="font-size: 13px; color: #b8f241">Bancos de dados</span>
+                      <span style="font-size:13px;font-family:'JetBrains Mono',monospace;color:var(--sv-accent)">5 / 5</span>
+                    </div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#1A1A17;border-radius:var(--sv-r-md)">
+                      <span style="font-size: 13px; color: #b8f241">Retenção</span>
+                      <span style="font-size: 13px; font-family: 'JetBrains Mono',monospace; color: #b8f241">30 dias</span>
+                    </div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#1A1A17;border-radius:var(--sv-r-md)">
+                      <span style="font-size: 13px; color: #b8f241">Próximo pagamento</span>
+                      <span style="font-size: 13px; font-family: 'JetBrains Mono',monospace; color: #b8f241">28/07/2026</span>
+                    </div>
+                  </div>
+                </div>
+                <div style="background:#FFFFFF;border:1px solid #E6E4DE;border-radius:var(--sv-r-lg);padding:var(--sv-stat-pad);margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:20px">
+                  <div>
+                    <div style="font-size:14px;font-weight:600;color:#0C0C0A;margin-bottom:4px">Upgrade para Business</div>
+                    <div style="font-size:12px;color:#706F6B;line-height:1.6">Bancos ilimitados, retenção de 90 dias, backup a cada 6h.</div>
+                  </div>
+                  <button onClick="{{ saveSettings }}" style="background:var(--sv-accent);color:var(--sv-accent-text);border:none;padding:9px 18px;border-radius:var(--sv-r-md);font-size:13px;font-weight:600;flex-shrink:0;white-space:nowrap">R$199/mês →</button>
+                </div>
+                <button style="background:transparent;border:none;color:#A9A8A3;font-size:12px;padding:0;cursor:pointer" style-hover="color:#706F6B">Cancelar assinatura</button>
+              </div>
+            </sc-if>
+
+            <!-- API Tokens -->
+            <sc-if value="{{ isTokTab }}" hint-placeholder-val="{{ false }}">
+              <div style="max-width:520px;animation:slideDown .2s ease">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+                  <p style="font-size:13px;color:#706F6B">Tokens autenticam o agente no servidor do cliente.</p>
+                  <button onClick="{{ genToken }}" style="background:var(--sv-accent);color:var(--sv-accent-text);border:none;padding:7px 14px;border-radius:var(--sv-r-md);font-size:12px;font-weight:600;flex-shrink:0;white-space:nowrap">+ Novo token</button>
+                </div>
+                <div style="background:#FFFFFF;border:1px solid #E6E4DE;border-radius:var(--sv-r-lg);overflow:hidden;margin-bottom:16px">
+                  <sc-for list="{{ apiTokens }}" as="t" hint-placeholder-count="3">
+                    <div style="padding:var(--sv-row-pad) 20px;border-bottom:1px solid #E6E4DE;display:flex;align-items:center;gap:16px" style-hover="background:rgba(0,0,0,.025)">
+                      <div style="flex:1;min-width:0">
+                        <div style="font-size:13px;font-weight:500;color:#0C0C0A;margin-bottom:2px">{{ t.label }}</div>
+                        <div style="font-size:11px;color:#A9A8A3;font-family:'JetBrains Mono',monospace">Usado {{ t.lastFmt }} · Criado {{ t.createdFmt }}</div>
+                      </div>
+                      <button onClick="{{ t.onRevoke }}" style="background:transparent;border:1px solid rgba(255,71,87,.2);color:#FF4757;padding:5px 12px;border-radius:var(--sv-r-sm);font-size:11px;font-weight:500;flex-shrink:0" style-hover="background:rgba(255,71,87,.08)">Revogar</button>
+                    </div>
+                  </sc-for>
+                </div>
+                <p style="font-size:12px;color:#A9A8A3;line-height:1.6">Os tokens são exibidos apenas uma vez ao serem gerados. Guarde-os com segurança.</p>
+              </div>
+            </sc-if>
+
+          </div>
+        </div>
+      </sc-if>
+
+    </div>
+  </div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:820},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#B8F241&quot;,&quot;options&quot;:[&quot;#B8F241&quot;,&quot;#4F8EF7&quot;,&quot;#F5A623&quot;,&quot;#A78BFA&quot;],&quot;section&quot;:&quot;Visual&quot;},&quot;density&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;compact&quot;,&quot;default&quot;,&quot;spacious&quot;],&quot;default&quot;:&quot;compact&quot;,&quot;section&quot;:&quot;Visual&quot;},&quot;radius&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;sharp&quot;,&quot;default&quot;,&quot;round&quot;],&quot;default&quot;:&quot;sharp&quot;,&quot;section&quot;:&quot;Visual&quot;}}">
+class Component extends DCLogic {
+  DBS = [
+    { id:'1', name:'Loja do João',    type:'mysql',    host:'192.168.1.10', port:3306, lastAt:'2026-06-28T02:14:00', status:'success', size:'4.2 MB',  nextAt:'2026-06-29T02:00:00', ret:30 },
+    { id:'2', name:'App da Maria',    type:'postgres', host:'10.0.0.5',     port:5432, lastAt:'2026-06-28T02:31:00', status:'success', size:'18.7 MB', nextAt:'2026-06-29T02:00:00', ret:30 },
+    { id:'3', name:'ERP Construtora', type:'mysql',    host:'172.16.0.3',   port:3306, lastAt:null,                  status:'running', size:null,       nextAt:null,                   ret:30 },
+    { id:'4', name:'API Produção',    type:'postgres', host:'10.0.1.8',     port:5432, lastAt:'2026-06-27T02:14:00', status:'failed',  size:null,       nextAt:'2026-06-29T02:00:00', ret:7,  error:'Connection refused: host unreachable after 10s' },
+    { id:'5', name:'Blog WordPress',  type:'mysql',    host:'159.223.45.12',port:3306, lastAt:'2026-06-28T03:00:00', status:'success', size:'234 MB',  nextAt:'2026-06-29T03:00:00', ret:30 },
+  ];
+
+  BACKUPS = [
+    { id:'b1',  dbId:'1', dbName:'Loja do João',    status:'success', size:'4.2 MB',  at:'2026-06-28T02:14:00', dur:'42s'      },
+    { id:'b2',  dbId:'2', dbName:'App da Maria',    status:'success', size:'18.7 MB', at:'2026-06-28T02:31:00', dur:'1m 15s'   },
+    { id:'b3',  dbId:'4', dbName:'API Produção',    status:'failed',  size:'—',       at:'2026-06-27T02:14:00', dur:'10m 0s',  error:'Connection refused: host unreachable after 10s' },
+    { id:'b4',  dbId:'5', dbName:'Blog WordPress',  status:'success', size:'234 MB',  at:'2026-06-28T03:00:00', dur:'3m 47s'   },
+    { id:'b5',  dbId:'1', dbName:'Loja do João',    status:'success', size:'4.0 MB',  at:'2026-06-27T02:14:00', dur:'40s'      },
+    { id:'b6',  dbId:'2', dbName:'App da Maria',    status:'success', size:'18.1 MB', at:'2026-06-27T02:31:00', dur:'1m 10s'   },
+    { id:'b7',  dbId:'4', dbName:'API Produção',    status:'success', size:'8.3 MB',  at:'2026-06-26T02:14:00', dur:'55s'      },
+    { id:'b8',  dbId:'5', dbName:'Blog WordPress',  status:'failed',  size:'—',       at:'2026-06-27T03:00:00', dur:'10m 0s',  error:'mysqldump: error 28 — No space left on device' },
+    { id:'b9',  dbId:'1', dbName:'Loja do João',    status:'success', size:'3.9 MB',  at:'2026-06-26T02:14:00', dur:'38s'      },
+    { id:'b10', dbId:'2', dbName:'App da Maria',    status:'success', size:'17.8 MB', at:'2026-06-26T02:31:00', dur:'1m 5s'    },
+    { id:'b11', dbId:'5', dbName:'Blog WordPress',  status:'success', size:'231 MB',  at:'2026-06-26T03:00:00', dur:'3m 52s'   },
+    { id:'b12', dbId:'4', dbName:'API Produção',    status:'success', size:'7.9 MB',  at:'2026-06-25T02:14:00', dur:'51s'      },
+    { id:'b13', dbId:'1', dbName:'Loja do João',    status:'success', size:'3.8 MB',  at:'2026-06-25T02:14:00', dur:'37s'      },
+    { id:'b14', dbId:'2', dbName:'App da Maria',    status:'success', size:'17.5 MB', at:'2026-06-25T02:31:00', dur:'1m 2s'    },
+    { id:'b15', dbId:'5', dbName:'Blog WordPress',  status:'success', size:'228 MB',  at:'2026-06-25T03:00:00', dur:'3m 45s'   },
+  ];
+
+  TOKENS = [
+    { id:'t1', label:'Servidor do cliente João', lastUsed:'2026-06-28T09:15:00', created:'2026-04-10' },
+    { id:'t2', label:'VPS da Maria',              lastUsed:'2026-06-27T14:30:00', created:'2026-05-22' },
+    { id:'t3', label:'Blog WordPress',            lastUsed:'2026-06-28T03:01:00', created:'2026-06-01' },
+  ];
+
+  state = {
+    screen: 'login',
+    step: 1,
+    tc: 'idle',          // idle | testing | ok | fail
+    hFilter: { db: 'all', status: 'all' },
+    sTab: 'account',     // account | notif | bill | tokens
+    notif: null,
+    delId: null,
+  };
+
+  _nt = null;
+
+  injectVars() {
+    const accent  = this.props.accent  || '#B8F241';
+    const density = this.props.density || 'default';
+    const radius  = this.props.radius  || 'default';
+    // Light-theme palette: bg tints are more opaque; ok text is dark for contrast on white
+    const palette = {
+      '#B8F241': { bg:'rgba(184,242,65,0.13)',  ok:'#3D5C00', border:'rgba(184,242,65,0.38)', text:'#0A0E00' },
+      '#4F8EF7': { bg:'rgba(79,142,247,0.1)',   ok:'#1D4ED8', border:'rgba(79,142,247,0.32)', text:'#ffffff' },
+      '#F5A623': { bg:'rgba(245,166,35,0.1)',   ok:'#92400E', border:'rgba(245,166,35,0.32)', text:'#0A0E00' },
+      '#A78BFA': { bg:'rgba(167,139,250,0.12)', ok:'#5B21B6', border:'rgba(167,139,250,0.32)', text:'#0A0E00' },
+    };
+    const p = palette[accent] || palette['#B8F241'];
+    const dens = { compact:['9px','14px 16px'], default:['12px','18px 20px'], spacious:['17px','24px 28px'] }[density] || ['12px','18px 20px'];
+    const rad  = { sharp:['3px','5px','8px'],   default:['6px','8px','12px'], round:['10px','14px','20px']  }[radius]  || ['6px','8px','12px'];
+    let el = document.getElementById('__sv-vars');
+    if (!el) { el = document.createElement('style'); el.id = '__sv-vars'; document.head.appendChild(el); }
+    el.textContent = `:root{--sv-accent:${accent};--sv-accent-bg:${p.bg};--sv-accent-ok:${p.ok};--sv-accent-border:${p.border};--sv-accent-text:${p.text};--sv-row-pad:${dens[0]};--sv-stat-pad:${dens[1]};--sv-r-sm:${rad[0]};--sv-r-md:${rad[1]};--sv-r-lg:${rad[2]}}`;
+  }
+
+  componentDidMount()  { this.injectVars(); }
+  componentDidUpdate() { this.injectVars(); }
+
+  notify(type, msg) {
+    if (this._nt) clearTimeout(this._nt);
+    this._nt = setTimeout(() => this.setState({ notif: null }), 3500);
+    this.setState({ notif: { type, msg } });
+  }
+
+  fmtDate(str) {
+    if (!str) return '—';
+    const d = new Date(str);
+    const ref = new Date('2026-06-28T12:00:00');
+    const days = Math.floor((ref - d) / 86400000);
+    const t = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+    if (days === 0) return 'hoje, ' + t;
+    if (days === 1) return 'ontem, ' + t;
+    return String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + ', ' + t;
+  }
+
+  fmtShort(str) {
+    if (!str) return '—';
+    const d = new Date(str);
+    return String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear();
+  }
+
+  navStyle(active) {
+    const d = this.props.density || 'default';
+    const p = d === 'compact' ? '6px 10px' : d === 'spacious' ? '11px 15px' : '8px 12px';
+    return { display:'flex', alignItems:'center', gap:'10px', padding:p, borderRadius:'var(--sv-r-sm)',
+      background: active ? 'var(--sv-accent-bg)' : 'transparent',
+      color: active ? 'var(--sv-accent-ok)' : '#706F6B',
+      fontSize:'13px', fontWeight: active ? '600' : '400', cursor:'pointer', userSelect:'none' };
+  }
+
+  chipStyle(active) {
+    return { padding:'6px 14px', borderRadius:'var(--sv-r-sm)', fontSize:'12px', fontWeight: active ? '600' : '400',
+      background: active ? 'var(--sv-accent-bg)' : 'transparent',
+      color: active ? 'var(--sv-accent-ok)' : '#706F6B',
+      border: '1px solid ' + (active ? 'var(--sv-accent-border)' : '#E6E4DE'), cursor:'pointer' };
+  }
+
+  tabStyle(active) {
+    return { padding:'8px 16px', fontSize:'13px', fontWeight: active ? '600' : '400',
+      color: active ? '#0C0C0A' : '#706F6B', background:'transparent', border:'none',
+      borderBottom: '2px solid ' + (active ? 'var(--sv-accent)' : 'transparent'),
+      cursor:'pointer', marginBottom:'-1px' };
+  }
+
+  circleStyle(n, cur) {
+    const on = cur >= n;
+    return { width:28, height:28, borderRadius:'50%', display:'flex', alignItems:'center',
+      justifyContent:'center', fontSize:'12px', fontWeight:'700',
+      background: on ? 'var(--sv-accent)' : '#F4F3EF',
+      color: on ? 'var(--sv-accent-text)' : '#A9A8A3',
+      border: '1px solid ' + (on ? 'transparent' : '#E6E4DE') };
+  }
+
+  // Returns a style for billing Pro card text (always needs light text on dark card)
+  proCardText(secondary) {
+    return { fontSize: secondary ? '13px' : '13px', color: secondary ? '#6B6A65' : '#E8E6E1' };
+  }
+
+  renderVals() {
+    const { screen, step, tc, hFilter, sTab, notif, delId } = this.state;
+    const isAuth = screen === 'login' || screen === 'register';
+
+    const dbs = this.DBS.map(d => ({
+      ...d,
+      hostPort: d.type.toUpperCase() + ' · ' + d.host + ':' + d.port,
+      sizeFmt:  d.size || '—',
+      lastFmt:  this.fmtDate(d.lastAt),
+      nextFmt:  d.status === 'running' ? 'executando…' : (d.lastAt ? 'em ~22h' : '—'),
+      retFmt:   d.ret + 'd',
+      isOk:   d.status === 'success',
+      isFail: d.status === 'failed',
+      isRun:  d.status === 'running',
+      onDownload: () => this.notify('success', '↓ Link de download gerado. Expira em 15 minutos.'),
+      onDelete:   () => this.setState({ delId: d.id }),
+      onTest:     () => this.notify('success', '✓ Conexão com "' + d.name + '" testada com sucesso.'),
+      onShowErr:  () => this.notify('error', '✗ ' + d.error),
+    }));
+
+    const recentBackups = this.BACKUPS.slice(0, 6).map(b => ({
+      ...b, dateFmt: this.fmtDate(b.at), isOk: b.status === 'success', isFail: b.status === 'failed',
+    }));
+
+    const filtered = this.BACKUPS.filter(b => {
+      if (hFilter.db !== 'all' && b.dbId !== hFilter.db) return false;
+      if (hFilter.status !== 'all' && b.status !== hFilter.status) return false;
+      return true;
+    });
+
+    const filteredBackups = filtered.map(b => ({
+      ...b, dateFmt: this.fmtDate(b.at), isOk: b.status === 'success', isFail: b.status === 'failed',
+      onDownload: () => this.notify('success', '↓ Link gerado para ' + b.dbName + '.'),
+    }));
+
+    const apiTokens = this.TOKENS.map(t => ({
+      ...t,
+      lastFmt:    this.fmtDate(t.lastUsed),
+      createdFmt: this.fmtShort(t.created),
+      onRevoke:   () => this.notify('success', 'Token "' + t.label + '" revogado.'),
+    }));
+
+    const delDb = this.DBS.find(d => d.id === delId);
+
+    const nextBtnStyle = {
+      background: tc === 'ok' ? 'var(--sv-accent)' : '#E6E4DE',
+      color: tc === 'ok' ? 'var(--sv-accent-text)' : '#373B52',
+      border:'none', padding:'10px 24px', borderRadius:'var(--sv-r-md)',
+      fontSize:'13px', fontWeight:'600',
+      cursor: tc === 'ok' ? 'pointer' : 'not-allowed', opacity: tc === 'ok' ? 1 : 0.5,
+    };
+
+    return {
+      // Auth routing
+      isAuthScreen:    isAuth,
+      isAppScreen:     !isAuth,
+      isLoginScreen:   screen === 'login',
+      isRegisterScreen:screen === 'register',
+
+      // App screens
+      isDashboard:      screen === 'dashboard',
+      isDatabasesScreen:screen === 'databases',
+      isAddDbScreen:    screen === 'addDb',
+      isHistoryScreen:  screen === 'history',
+      isSettingsScreen: screen === 'settings',
+
+      // Add DB steps
+      isStep1: step === 1, isStep2: step === 2, isStep3: step === 3,
+      step1Done: step > 1, step1Active: step <= 1,
+      step2Done: step > 2, step2NotDone: step <= 2,
+
+      // Step visuals
+      step1Style: this.circleStyle(1, step),
+      step2Style: this.circleStyle(2, step),
+      step3Style: this.circleStyle(3, step),
+      step1LblStyle: { fontSize:'12px', fontWeight:'500', color: step >= 1 ? '#E8EAF0' : '#373B52' },
+      step2LblStyle: { fontSize:'12px', fontWeight:'500', color: step >= 2 ? '#E8EAF0' : '#373B52' },
+      step3LblStyle: { fontSize:'12px', fontWeight:'500', color: step >= 3 ? '#E8EAF0' : '#373B52' },
+      line1Style: { width:'40px', height:'1px', background: step > 1 ? 'var(--sv-accent)' : '#E6E4DE', flexShrink:0 },
+      line2Style: { width:'40px', height:'1px', background: step > 2 ? 'var(--sv-accent)' : '#E6E4DE', flexShrink:0 },
+
+      // Test connection
+      tcIdle:    tc === 'idle',
+      tcTesting: tc === 'testing',
+      tcOk:      tc === 'ok',
+      tcFail:    tc === 'fail',
+      nextBtnStyle,
+
+      // Data
+      dbs,
+      recentBackups,
+      filteredBackups,
+      apiTokens,
+      totalDbs:     this.DBS.length,
+      todayCount:   this.DBS.filter(d => d.status === 'success').length,
+      filteredCount: filtered.length,
+      totalCount:   this.BACKUPS.length,
+
+      // History filter
+      histDbVal:     hFilter.db,
+      dbFilterOpts: [{ id:'all', name:'Todos os bancos' }, ...this.DBS.map(d => ({ id:d.id, name:d.name }))],
+      hAllStyle:  this.chipStyle(hFilter.status === 'all'),
+      hOkStyle:   this.chipStyle(hFilter.status === 'success'),
+      hFailStyle: this.chipStyle(hFilter.status === 'failed'),
+
+      // Settings tabs
+      isAccTab:   sTab === 'account',
+      isNotifTab: sTab === 'notif',
+      isBillTab:  sTab === 'bill',
+      isTokTab:   sTab === 'tokens',
+      tabAccStyle:   this.tabStyle(sTab === 'account'),
+      tabNotifStyle: this.tabStyle(sTab === 'notif'),
+      tabBillStyle:  this.tabStyle(sTab === 'bill'),
+      tabTokStyle:   this.tabStyle(sTab === 'tokens'),
+
+      // Confirm delete modal
+      showConfirmDelete: !!delId,
+      confirmDeleteName: delDb ? delDb.name : '',
+
+      // Nav styles
+      navDashStyle: this.navStyle(screen === 'dashboard'),
+      navDbStyle:   this.navStyle(screen === 'databases' || screen === 'addDb'),
+      navHistStyle: this.navStyle(screen === 'history'),
+      navSettStyle: this.navStyle(screen === 'settings'),
+
+      // Notifications
+      hasNotif:     !!notif,
+      notifMsg:     notif ? notif.msg : '',
+      notifIsSuccess: notif ? notif.type === 'success' : false,
+      notifIsError:   notif ? notif.type === 'error'   : false,
+
+      // Auth handlers
+      doLogin:      () => this.setState({ screen:'dashboard' }),
+      doRegister:   () => this.setState({ screen:'dashboard' }),
+      goToLogin:    () => this.setState({ screen:'login' }),
+      goToRegister: () => this.setState({ screen:'register' }),
+
+      // Nav handlers
+      goToDashboard:  () => this.setState({ screen:'dashboard' }),
+      goToDatabases:  () => this.setState({ screen:'databases' }),
+      goToAddDb:      () => this.setState({ screen:'addDb', step:1, tc:'idle' }),
+      goToHistory:    () => this.setState({ screen:'history' }),
+      goToSettings:   () => this.setState({ screen:'settings' }),
+      goToLogout:     () => this.setState({ screen:'login' }),
+
+      // Add DB
+      testConn: () => {
+        this.setState({ tc:'testing' });
+        setTimeout(() => this.setState({ tc:'ok' }), 2000);
+      },
+      nextStep: () => {
+        const { step, tc } = this.state;
+        if (step === 1 && tc !== 'ok') return;
+        if (step < 3) { this.setState(s => ({ step: s.step + 1 })); }
+        else { this.setState({ screen:'databases' }); this.notify('success', '✓ Banco adicionado com sucesso!'); }
+      },
+      prevStep: () => this.setState(s => ({ step: Math.max(1, s.step - 1) })),
+      copyToken: () => this.notify('success', '✓ Token copiado para a área de transferência.'),
+
+      // History filters
+      setHistDb:  (e) => this.setState(s => ({ hFilter: { ...s.hFilter, db: e.target.value } })),
+      histAll:    () => this.setState(s => ({ hFilter: { ...s.hFilter, status:'all' } })),
+      histOk:     () => this.setState(s => ({ hFilter: { ...s.hFilter, status:'success' } })),
+      histFail:   () => this.setState(s => ({ hFilter: { ...s.hFilter, status:'failed' } })),
+
+      // Settings
+      setAccTab:   () => this.setState({ sTab:'account' }),
+      setNotifTab: () => this.setState({ sTab:'notif' }),
+      setBillTab:  () => this.setState({ sTab:'bill' }),
+      setTokTab:   () => this.setState({ sTab:'tokens' }),
+      saveSettings:() => this.notify('success', '✓ Configurações salvas.'),
+      genToken:    () => this.notify('success', '✓ Novo token gerado. Copie-o agora — não será exibido novamente.'),
+
+      // Delete modal
+      onCancelDelete:  () => this.setState({ delId:null }),
+      onConfirmDelete: () => { this.setState({ delId:null }); this.notify('success', '✓ Banco removido permanentemente.'); },
+    };
+  }
+}
+</script>
+</body>
+</html>
