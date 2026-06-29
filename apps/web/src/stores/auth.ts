@@ -1,6 +1,8 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 interface User {
+  id: string;
   name: string;
   email: string;
   plan: string;
@@ -10,33 +12,42 @@ interface AuthState {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => void;
-  register: (name: string, email: string, password: string) => void;
+  setToken: (token: string) => void;
+  setAuth: (user: User, token: string) => void;
+  updateUser: (user: User) => void;
   logout: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  token: null,
-  isAuthenticated: false,
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      token: null,
+      isAuthenticated: false,
 
-  login: (_email: string, _password: string) => {
-    set({
-      user: { name: 'Andre Oliveira', email: 'andre@agencia.com.br', plan: 'Pro' },
-      token: 'sv_mock_token_xyz',
-      isAuthenticated: true,
-    });
-  },
+      setToken: (token: string) => {
+        set({ token });
+      },
 
-  register: (name: string, email: string, _password: string) => {
-    set({
-      user: { name, email, plan: 'Pro' },
-      token: 'sv_mock_token_xyz',
-      isAuthenticated: true,
-    });
-  },
+      setAuth: (user: User, token: string) => {
+        set({ user, token, isAuthenticated: true });
+      },
 
-  logout: () => {
-    set({ user: null, token: null, isAuthenticated: false });
-  },
-}));
+      updateUser: (user: User) => {
+        set({ user });
+      },
+
+      logout: () => {
+        set({ user: null, token: null, isAuthenticated: false });
+      },
+    }),
+    {
+      name: 'snapvault-auth',
+      partialize: (state) => ({
+        user: state.user,
+        token: state.token,
+        isAuthenticated: state.isAuthenticated,
+      }),
+    },
+  ),
+);

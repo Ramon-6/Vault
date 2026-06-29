@@ -7,6 +7,7 @@ import databaseRoutes from './modules/databases/routes.js'
 import backupRoutes from './modules/backups/routes.js'
 import billingRoutes from './modules/billing/routes.js'
 import alertRoutes from './modules/alerts/routes.js'
+import tokenRoutes from './modules/tokens/routes.js'
 import { setupScheduler } from './jobs/scheduler.js'
 
 const app = Fastify({
@@ -43,6 +44,7 @@ await app.register(databaseRoutes)
 await app.register(backupRoutes)
 await app.register(billingRoutes)
 await app.register(alertRoutes)
+await app.register(tokenRoutes)
 
 // Start server
 const port = parseInt(process.env.PORT ?? '3001', 10)

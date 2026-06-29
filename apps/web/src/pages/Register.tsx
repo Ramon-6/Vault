@@ -1,18 +1,31 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../stores/auth';
+import api from '../lib/api';
 
 export default function Register() {
   const navigate = useNavigate();
-  const register = useAuthStore((s) => s.register);
+  const setAuth = useAuthStore((s) => s.setAuth);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    register(name || 'Andre Oliveira', email || 'andre@agencia.com.br', password);
-    navigate('/dashboard');
+    setError('');
+    setLoading(true);
+
+    try {
+      const { data } = await api.post('/auth/register', { name, email, password });
+      setAuth(data.user, data.token);
+      navigate('/dashboard');
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Erro ao criar conta. Tente novamente.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -23,6 +36,15 @@ export default function Register() {
         </h1>
         <p className="text-[13px] text-sv-secondary mb-7">14 dias sem cartao de credito.</p>
 
+        {error && (
+          <div
+            className="mb-4 p-3 rounded-sv-md text-[13px] text-sv-error"
+            style={{ background: 'rgba(255,71,87,0.08)', border: '1px solid rgba(255,71,87,0.2)' }}
+          >
+            {error}
+          </div>
+        )}
+
         <div className="mb-4">
           <label className="block text-[12px] font-medium text-sv-secondary mb-1.5">Nome completo</label>
           <input
@@ -30,6 +52,7 @@ export default function Register() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Andre Oliveira"
+            required
             className="w-full bg-sv-input border border-sv-border rounded-sv-md py-[9px] px-3 text-sv-text text-[13px] outline-none"
           />
         </div>
@@ -41,6 +64,7 @@ export default function Register() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="seu@email.com"
+            required
             className="w-full bg-sv-input border border-sv-border rounded-sv-md py-[9px] px-3 text-sv-text text-[13px] outline-none"
           />
         </div>
@@ -52,15 +76,18 @@ export default function Register() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Minimo 8 caracteres"
+            required
+            minLength={8}
             className="w-full bg-sv-input border border-sv-border rounded-sv-md py-[9px] px-3 text-sv-text text-[13px] outline-none"
           />
         </div>
 
         <button
           type="submit"
-          className="w-full bg-sv-accent text-sv-accent-text font-bold text-[14px] py-[11px] rounded-sv-md border-none"
+          disabled={loading}
+          className="w-full bg-sv-accent text-sv-accent-text font-bold text-[14px] py-[11px] rounded-sv-md border-none disabled:opacity-60"
         >
-          Criar conta &rarr;
+          {loading ? 'Criando conta...' : 'Criar conta →'}
         </button>
         <p className="text-[11px] text-sv-hint text-center mt-3.5 leading-relaxed">
           Ao criar conta voce aceita os <a href="#" className="text-sv-secondary">Termos de Uso</a> e a{' '}

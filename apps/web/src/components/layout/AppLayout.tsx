@@ -1,7 +1,9 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../../stores/auth';
 import { LogoIcon, DashboardIcon, DatabaseIcon, HistoryIcon, SettingsIcon, LogoutIcon } from '../ui/Icons';
 import Toast from '../ui/Toast';
+import api from '../../lib/api';
 
 const navItems = [
   { to: '/dashboard', label: 'Visao geral', icon: DashboardIcon },
@@ -12,10 +14,13 @@ const navItems = [
 
 export default function AppLayout() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const logout = useAuthStore((s) => s.logout);
   const user = useAuthStore((s) => s.user);
 
   const handleLogout = () => {
+    api.post('/auth/logout').catch(() => {});
+    queryClient.clear();
     logout();
     navigate('/login');
   };

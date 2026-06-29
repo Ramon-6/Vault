@@ -3,21 +3,66 @@ import { useNavigate } from 'react-router-dom';
 import { useToastStore } from '../stores/toast';
 import { ChevronLeftIcon, CopyIcon } from '../components/ui/Icons';
 import Toggle from '../components/ui/Toggle';
+import { useCreateDatabase } from '../hooks/useData';
+import api from '../lib/api';
 
 type TCState = 'idle' | 'testing' | 'ok' | 'fail';
 
 export default function AddDatabase() {
   const navigate = useNavigate();
   const showToast = useToastStore((s) => s.show);
+  const createMutation = useCreateDatabase();
   const [step, setStep] = useState(1);
   const [tc, setTc] = useState<TCState>('idle');
-  const [dbType, setDbType] = useState<'mysql' | 'postgres'>('mysql');
+  const [tcError, setTcError] = useState('');
+  const [dbType, setDbType] = useState<'MYSQL' | 'POSTGRES'>('MYSQL');
   const [emailSuccess, setEmailSuccess] = useState(true);
   const [retention, setRetention] = useState(30);
+  const [schedule, setSchedule] = useState('0 2 * * *');
 
-  const testConnection = () => {
+  const [name, setName] = useState('');
+  const [host, setHost] = useState('');
+  const [port, setPort] = useState(3306);
+  const [dbName, setDbName] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+
+  const [createdDbId, setCreatedDbId] = useState<string | null>(null);
+
+  const testConnection = async () => {
     setTc('testing');
-    setTimeout(() => setTc('ok'), 2000);
+    setTcError('');
+
+    try {
+      const { data: createData } = await api.post('/databases', {
+        name: name || 'Temp Test',
+        type: dbType,
+        host,
+        port,
+        dbName,
+        username,
+        password,
+        schedule,
+        retention,
+      });
+
+      const dbId = createData.database.id;
+      setCreatedDbId(dbId);
+
+      const { data: testData } = await api.post(`/databases/${dbId}/test`);
+
+      if (testData.success) {
+        setTc('ok');
+      } else {
+        setTc('fail');
+        setTcError(testData.message);
+        await api.delete(`/databases/${dbId}`);
+        setCreatedDbId(null);
+      }
+    } catch (err: any) {
+      setTc('fail');
+      setTcError(err.response?.data?.error || err.message || 'Erro desconhecido');
+    }
   };
 
   const nextStep = () => {
@@ -25,6 +70,9 @@ export default function AddDatabase() {
     if (step < 3) {
       setStep((s) => s + 1);
     } else {
+      if (createdDbId) {
+        api.put(`/databases/${createdDbId}`, { name, schedule, retention }).catch(() => {});
+      }
       navigate('/databases');
       showToast('success', '✓ Banco adicionado com sucesso!');
     }
@@ -103,6 +151,8 @@ export default function AddDatabase() {
               <label className="block text-[12px] font-medium text-sv-secondary mb-1.5">Nome amigavel</label>
               <input
                 type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 placeholder="ex: Banco do Cliente Joao"
                 className="w-full bg-sv-input border border-sv-border rounded-sv-md py-[9px] px-3 text-sv-text text-[13px] outline-none"
               />
@@ -112,38 +162,38 @@ export default function AddDatabase() {
               <label className="block text-[12px] font-medium text-sv-secondary mb-2">Tipo de banco</label>
               <div className="flex gap-2">
                 <div
-                  onClick={() => setDbType('mysql')}
+                  onClick={() => { setDbType('MYSQL'); setPort(3306); }}
                   className="flex-1 bg-sv-input rounded-sv-md py-2.5 px-3.5 flex items-center gap-2 cursor-pointer"
-                  style={{ border: dbType === 'mysql' ? '1px solid #B8F241' : '1px solid #E6E4DE' }}
+                  style={{ border: dbType === 'MYSQL' ? '1px solid #B8F241' : '1px solid #E6E4DE' }}
                 >
                   <div
                     className="w-[18px] h-[18px] rounded-full flex items-center justify-center"
                     style={{
-                      background: dbType === 'mysql' ? '#B8F241' : 'transparent',
-                      border: dbType === 'mysql' ? 'none' : '2px solid #D4D2CC',
+                      background: dbType === 'MYSQL' ? '#B8F241' : 'transparent',
+                      border: dbType === 'MYSQL' ? 'none' : '2px solid #D4D2CC',
                     }}
                   >
-                    {dbType === 'mysql' && <div className="w-[7px] h-[7px] rounded-full bg-sv-accent-text" />}
+                    {dbType === 'MYSQL' && <div className="w-[7px] h-[7px] rounded-full bg-sv-accent-text" />}
                   </div>
-                  <span className={`text-[13px] ${dbType === 'mysql' ? 'font-medium text-sv-text' : 'text-sv-secondary'}`}>
+                  <span className={`text-[13px] ${dbType === 'MYSQL' ? 'font-medium text-sv-text' : 'text-sv-secondary'}`}>
                     MySQL
                   </span>
                 </div>
                 <div
-                  onClick={() => setDbType('postgres')}
+                  onClick={() => { setDbType('POSTGRES'); setPort(5432); }}
                   className="flex-1 bg-sv-input rounded-sv-md py-2.5 px-3.5 flex items-center gap-2 cursor-pointer hover:border-[#D4D2CC]"
-                  style={{ border: dbType === 'postgres' ? '1px solid #B8F241' : '1px solid #E6E4DE' }}
+                  style={{ border: dbType === 'POSTGRES' ? '1px solid #B8F241' : '1px solid #E6E4DE' }}
                 >
                   <div
                     className="w-[18px] h-[18px] rounded-full flex items-center justify-center"
                     style={{
-                      background: dbType === 'postgres' ? '#B8F241' : 'transparent',
-                      border: dbType === 'postgres' ? 'none' : '2px solid #D4D2CC',
+                      background: dbType === 'POSTGRES' ? '#B8F241' : 'transparent',
+                      border: dbType === 'POSTGRES' ? 'none' : '2px solid #D4D2CC',
                     }}
                   >
-                    {dbType === 'postgres' && <div className="w-[7px] h-[7px] rounded-full bg-sv-accent-text" />}
+                    {dbType === 'POSTGRES' && <div className="w-[7px] h-[7px] rounded-full bg-sv-accent-text" />}
                   </div>
-                  <span className={`text-[13px] ${dbType === 'postgres' ? 'font-medium text-sv-text' : 'text-sv-secondary'}`}>
+                  <span className={`text-[13px] ${dbType === 'POSTGRES' ? 'font-medium text-sv-text' : 'text-sv-secondary'}`}>
                     PostgreSQL
                   </span>
                 </div>
@@ -155,6 +205,8 @@ export default function AddDatabase() {
                 <label className="block text-[12px] font-medium text-sv-secondary mb-1.5">Host</label>
                 <input
                   type="text"
+                  value={host}
+                  onChange={(e) => setHost(e.target.value)}
                   placeholder="192.168.1.10"
                   className="w-full bg-sv-input border border-sv-border rounded-sv-md py-[9px] px-3 text-sv-text text-[13px] outline-none font-mono"
                 />
@@ -163,7 +215,8 @@ export default function AddDatabase() {
                 <label className="block text-[12px] font-medium text-sv-secondary mb-1.5">Porta</label>
                 <input
                   type="number"
-                  defaultValue={dbType === 'mysql' ? 3306 : 5432}
+                  value={port}
+                  onChange={(e) => setPort(Number(e.target.value))}
                   className="w-full bg-sv-input border border-sv-border rounded-sv-md py-[9px] px-3 text-sv-text text-[13px] outline-none font-mono"
                 />
               </div>
@@ -174,6 +227,8 @@ export default function AddDatabase() {
                 <label className="block text-[12px] font-medium text-sv-secondary mb-1.5">Banco de dados</label>
                 <input
                   type="text"
+                  value={dbName}
+                  onChange={(e) => setDbName(e.target.value)}
                   placeholder="nome_do_banco"
                   className="w-full bg-sv-input border border-sv-border rounded-sv-md py-[9px] px-3 text-sv-text text-[13px] outline-none font-mono"
                 />
@@ -182,6 +237,8 @@ export default function AddDatabase() {
                 <label className="block text-[12px] font-medium text-sv-secondary mb-1.5">Usuario</label>
                 <input
                   type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   placeholder="db_user"
                   className="w-full bg-sv-input border border-sv-border rounded-sv-md py-[9px] px-3 text-sv-text text-[13px] outline-none font-mono"
                 />
@@ -192,6 +249,8 @@ export default function AddDatabase() {
               <label className="block text-[12px] font-medium text-sv-secondary mb-1.5">Senha</label>
               <input
                 type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••••"
                 className="w-full bg-sv-input border border-sv-border rounded-sv-md py-[9px] px-3 text-sv-text text-[13px] outline-none"
               />
@@ -256,12 +315,14 @@ export default function AddDatabase() {
                       <div className="text-[12px] text-sv-secondary">Verifique host, porta e credenciais.</div>
                     </div>
                   </div>
-                  <div
-                    className="rounded-sv p-2.5 px-3 text-[12px] text-sv-error font-mono mb-2.5"
-                    style={{ background: 'rgba(255,71,87,0.06)', border: '1px solid rgba(255,71,87,0.15)' }}
-                  >
-                    Error: Connection refused after 10s timeout
-                  </div>
+                  {tcError && (
+                    <div
+                      className="rounded-sv p-2.5 px-3 text-[12px] text-sv-error font-mono mb-2.5"
+                      style={{ background: 'rgba(255,71,87,0.06)', border: '1px solid rgba(255,71,87,0.15)' }}
+                    >
+                      {tcError}
+                    </div>
+                  )}
                   <button
                     onClick={testConnection}
                     className="bg-transparent text-sv-secondary py-1.5 px-3.5 rounded-sv text-[12px] hover:border-[#D4D2CC] hover:text-sv-text transition-colors"
@@ -304,7 +365,11 @@ export default function AddDatabase() {
 
             <div className="mb-5">
               <label className="block text-[12px] font-medium text-sv-secondary mb-2">Horario do backup</label>
-              <select className="w-full bg-sv-input border border-sv-border rounded-sv-md py-[9px] px-3 text-sv-text text-[13px] outline-none cursor-pointer">
+              <select
+                value={schedule}
+                onChange={(e) => setSchedule(e.target.value)}
+                className="w-full bg-sv-input border border-sv-border rounded-sv-md py-[9px] px-3 text-sv-text text-[13px] outline-none cursor-pointer"
+              >
                 <option value="0 2 * * *">02:00 — Madrugada (recomendado)</option>
                 <option value="0 3 * * *">03:00 — Madrugada</option>
                 <option value="0 6 * * *">06:00 — Manha cedo</option>
@@ -455,8 +520,8 @@ export default function AddDatabase() {
               <div className="flex flex-col gap-2">
                 {[
                   'Banco adicionado e credenciais criptografadas',
-                  'Backup diario as 02:00 (horario de Brasilia)',
-                  'Retencao de 30 dias configurada',
+                  `Backup diario as ${schedule.split(' ')[1]}:00 (horario de Brasilia)`,
+                  `Retencao de ${retention} dias configurada`,
                   'Alertas por e-mail ativados',
                 ].map((item) => (
                   <div key={item} className="flex items-center gap-2.5">

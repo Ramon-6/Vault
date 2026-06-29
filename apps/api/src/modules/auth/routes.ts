@@ -155,6 +155,59 @@ export default async function authRoutes(app: FastifyInstance): Promise<void> {
     return reply.send({ message: 'Logout realizado com sucesso' })
   })
 
+  // PUT /auth/profile
+  app.put(
+    '/auth/profile',
+    { preHandler: [authenticate] },
+    async (request, reply) => {
+      const { name, currentPassword, newPassword } = request.body as {
+        name?: string
+        currentPassword?: string
+        newPassword?: string
+      }
+
+      const user = await prisma.user.findUnique({
+        where: { id: request.user.id },
+      })
+
+      if (!user) {
+        return reply.status(404).send({ error: 'Usuário não encontrado' })
+      }
+
+      const updateData: Record<string, unknown> = {}
+
+      if (name !== undefined) {
+        updateData.name = name
+      }
+
+      if (newPassword) {
+        if (!currentPassword) {
+          return reply.status(400).send({ error: 'Senha atual é obrigatória para alterar a senha' })
+        }
+        const valid = await bcrypt.compare(currentPassword, user.passwordHash)
+        if (!valid) {
+          return reply.status(401).send({ error: 'Senha atual incorreta' })
+        }
+        if (newPassword.length < 8) {
+          return reply.status(400).send({ error: 'Nova senha deve ter no mínimo 8 caracteres' })
+        }
+        updateData.passwordHash = await bcrypt.hash(newPassword, BCRYPT_ROUNDS)
+      }
+
+      if (Object.keys(updateData).length === 0) {
+        return reply.status(400).send({ error: 'Nenhum dado para atualizar' })
+      }
+
+      const updated = await prisma.user.update({
+        where: { id: request.user.id },
+        data: updateData,
+        select: { id: true, name: true, email: true, plan: true },
+      })
+
+      return reply.send({ user: updated })
+    },
+  )
+
   // GET /auth/me
   app.get(
     '/auth/me',
