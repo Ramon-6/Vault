@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  passwordHash String
+  name         String
+  plan         Plan       @default(STARTER)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  databases Database[]
+  apiTokens ApiToken[]
+}
+
+model Database {
+  id          String         @id @default(cuid())
+  userId      String
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name        String
+  type        DatabaseType
+  host        String
+  port        Int
+  dbName      String
+  username    String
+  passwordEnc String
+  iv          String
+  authTag     String
+
+  schedule     String       @default("0 2 * * *")
+  retention    Int          @default(7)
+  isActive     Boolean      @default(true)
+  lastBackupAt DateTime?
+  lastStatus   BackupStatus?
+
+  createdAt DateTime @default(now())
+  backups   Backup[]
+}
+
+model Backup {
+  id         String       @id @default(cuid())
+  databaseId String
+  database   Database     @relation(fields: [databaseId], references: [id], onDelete: Cascade)
+
+  status       BackupStatus
+  sizeBytes    BigInt?
+  b2FileId     String?
+  b2FilePath   String?
+  encKeyHash   String?
+
+  startedAt    DateTime   @default(now())
+  finishedAt   DateTime?
+  errorMessage String?
+
+  checksumSha256 String?
+}
+
+model ApiToken {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  databaseId String?
+
+  tokenHash  String    @unique
+  label      String
+  lastUsedAt DateTime?
+  expiresAt  DateTime?
+  createdAt  DateTime  @default(now())
+}
+
+enum DatabaseType {
+  MYSQL
+  POSTGRES
+}
+
+enum BackupStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  FAILED
+}
+
+enum Plan {
+  STARTER
+  PRO
+  BUSINESS
+}

@@ -1,0 +1,17 @@
+{
+  "name": "snapvault",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev:api & npm run dev:web",
+    "dev:api": "npm run dev --workspace=@snapvault/api",
+    "dev:web": "npm run dev --workspace=@snapvault/web",
+    "build": "npm run build --workspaces",
+    "build:api": "npm run build --workspace=@snapvault/api",
+    "build:web": "npm run build --workspace=@snapvault/web"
+  }
+}
